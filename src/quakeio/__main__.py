@@ -1,10 +1,9 @@
-import sys
 import argparse
-import importlib
 import quakeio
 
 
 def build_parser():
+    # fmt: off
     parser = argparse.ArgumentParser(
         prog="quakeio", description="Ground motion processing utilities."
     )
@@ -30,6 +29,7 @@ def build_parser():
     parser.add_argument(
         "--version", help="Print version and exit.", action="store_true"
     )
+    # fmt: on
     return parser
 
 
@@ -41,7 +41,7 @@ def cli(*args, **kwds):
         cmds = kwds.pop("command")
     # if kwds["read_file"] == "-":
     #    kwds["read_file"] = sys.stdin
-    #write_file = sys.stdout if kwds["write_file"] == "-" else kwds["write_file"]
+    # write_file = sys.stdout if kwds["write_file"] == "-" else kwds["write_file"]
     write_file = kwds["write_file"]
     del kwds["write_file"]
     motion = quakeio.read(**kwds)

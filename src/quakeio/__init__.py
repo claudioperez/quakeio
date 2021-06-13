@@ -1,10 +1,8 @@
 # Claudio Perez
-__version__ = "0.0.0"
+__version__ = "0.0.1"
 
-import json
 from pathlib import Path
 
-from .core import GroundMotionEvent, GroundMotionRecord, GroundMotionSeries
 from . import csmip, nga, basic_formats
 
 
@@ -41,5 +39,5 @@ def write(write_file, ground_motion, write_format=None, *args, **kwds):
             typ = DEFAULT_TYPES[Path(write_file).suffix]
         except KeyError:
             raise ValueError("Unable to deduce output format")
-    #with open_quake(write_file,"w") as f:
     FILE_TYPES[typ]["write"](write_file, ground_motion, *args, **kwds)
+

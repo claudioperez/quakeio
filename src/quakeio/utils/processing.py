@@ -57,4 +57,3 @@ def arias_intensity(series, time_series=None, time_step=None):
 def integrate_husid(series, time_series=None, time_step=None):
     time = _get_time_series(series, time_series, time_step)
     return scipy.integrate.cumtrapz(series ** 2.0, time)
-

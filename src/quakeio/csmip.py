@@ -23,6 +23,7 @@ RE_UNITS = "[a-z,/,*,0-9]*"
 
 date = lambda x: x
 
+# fmt: off
 HEADER_FIELDS = {
     ("record.peak_accel", ".units", ".time"): ((float, str, float),
         re.compile(
@@ -56,6 +57,7 @@ HEADER_FIELDS = {
         re.compile(f"([0-9]*) *points of displ data equally spaced at *({RE_DECIMAL})"),
     ),
 }
+# fmt: on
 
 
 def read_event(read_file, **kwds):

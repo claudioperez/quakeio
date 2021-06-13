@@ -1,15 +1,12 @@
-import re, io
-import numpy as np
+import io
 from pathlib import Path
 from typing import Union, IO
 import contextlib
 
 
-
 @contextlib.contextmanager
 def open_quake(file, mode=None, archive=None):
     import sys
-
     if file == "-":
         if mode is None or mode == "" or "r" in mode:
             fh = sys.stdin
@@ -20,25 +17,25 @@ def open_quake(file, mode=None, archive=None):
     else:
         fh = archive.open(file, mode)
 
-    #if file != "-":
-    #    yield fh
-    #    fh.close()
+    # if file != "-":
+    #     yield fh
+    #     fh.close()
     try:
         yield fh
     finally:
         if file != "-":
             fh.close()
 
-def parse_sequential_fields(data, field_spec:dict, parsed_fields={})->dict:
+
+def parse_sequential_fields(data, field_spec: dict, parsed_fields={}) -> dict:
     """ """
-    import sys
     field_iterator = iter(field_spec.items())
     fields, (typs, regex) = next(field_iterator)
     for line in data:
         match = regex.findall(str(line))
         if match:
             prefix = ""
-            assert len(fields) ==  len(typs) == len(match[0])
+            assert len(fields) == len(typs) == len(match[0])
             for field, typ, val in zip(fields, typs, match[0]):
                 if field[0] == ".":
                     key = prefix + field
@@ -46,7 +43,7 @@ def parse_sequential_fields(data, field_spec:dict, parsed_fields={})->dict:
                     prefix = field
                     key = field
 
-                parsed_fields[key] = typ(val) 
+                parsed_fields[key] = typ(val)
             try:
                 fields, (typs, regex) = next(field_iterator)
             except StopIteration:
@@ -55,6 +52,7 @@ def parse_sequential_fields(data, field_spec:dict, parsed_fields={})->dict:
         else:
             pass
     return parsed_fields
+
 
 def parse_sequential_fields_v0(data, fields, parsed_fields={}):
     """ """
@@ -80,3 +78,4 @@ def get_file_type(
 ) -> str:
     if isinstance(file, io.IOBase):
         return file_type
+
