@@ -2,7 +2,7 @@ import re
 
 import numpy as np
 
-RE_TIME_STEP = re.compile("DT=\s+(.*)SEC")
+RE_TIME_STEP = re.compile(r"DT=\s+(.*)SEC")
 
 
 def parse_nga(file_name, meta=False):
