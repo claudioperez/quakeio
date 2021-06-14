@@ -4,19 +4,22 @@
 ![Build status][build-img]
 [![Commits since latest release][gh-image]][gh-link]
 
+QuakeIO is a library of utilities for parsing ground motion files. Interfaces are provided for Python, Matlab, and the command line.
+
 ## Formats
 
-- [x] CSMIP
-- [x] PEER NGA
-- [ ] plain.tsv
-- [ ] plain.csv
-- [ ] mdof
-- [ ] SimCenter Event
+| Format          | read      | write   |
+|-----------------|-----------|---------|
+| CSMIP           | &#9744;   | &#9744; |
+| PEER NGA        | &#9744;   | &#9744; |
+| plain.tsv       | &#9744;   | &#9744; |
+| plain.csv       | &#9744;   | &#9744; |
+| mdof            | &#9744;   | &#9744; |
+| SimCenter Event | &#9744;   | &#9744; |
 
 ## Examples
 
 ### Command line
-
 
 ```bash
 $ quakeio -a rot:30 chan001.v2 -t html
