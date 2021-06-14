@@ -6,14 +6,22 @@ Parse a CSMIP Volume 2 strong motion data file.
 import re
 import zipfile
 from pathlib import Path
-from typing import Union
 from collections import defaultdict
 
 import numpy as np
 
-from .core import GroundMotionEvent, GroundMotionRecord, GroundMotionSeries, RealNumber
-from .utils.parseutils import parse_sequential_fields, get_file_type, open_quake
+from .core import (
+    GroundMotionEvent,
+    GroundMotionRecord,
+    GroundMotionSeries,
+    # RealNumber
+)
+from .utils.parseutils import (
+    parse_sequential_fields,
+    open_quake
+)
 
+# Module constants
 NUM_COLUMNS = 8
 HEADER_END_LINE = 45
 
@@ -22,19 +30,14 @@ RE_DECIMAL = "[-]?[0-9]*[.][0-9]*"
 # Regular expression for extracting units
 RE_UNITS = "[a-z,/,*,0-9]*"
 
-date = lambda x: x
-
 # fmt: off
 HEADER_FIELDS = {
-    #("record.date_processed",): ((str,),
-    #   re.compile(r"Processed: *(\d\d/\d\d/\d\d,)"),
-    #),
-    ("record.station_no", "record.azimuth"): ((str,str),
+    ("record.station_no", "record.azimuth"): ((str, str),
         re.compile(
             rf"Station No\. *([0-9]*) *({RE_DECIMAL}[NSEW]*, *{RE_DECIMAL}[NSEW]*)"
         )
     ),
-    ("record.instr_period", ".units"): ((float,str),
+    ("record.instr_period", ".units"): ((float, str),
         re.compile(
             rf"Instr Period = ({RE_DECIMAL}) ({RE_UNITS}),"
         )
@@ -44,27 +47,27 @@ HEADER_FIELDS = {
             rf"Peak *acceleration *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})"
         )
     ),
-    ("record.peak_veloc",".units",".time"): ((float, str, float), 
+    ("record.peak_veloc", ".units", ".time"): ((float, str, float),
         re.compile(
             rf"Peak *velocity *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})"
         )
     ),
-    ("record.peak_displ",".units",".time"): ((float, str, float),
+    ("record.peak_displ", ".units", ".time"): ((float, str, float),
         re.compile(
             rf"Peak *displacement *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})"
-        ),
+        )
     ),
-    ("record.init_veloc",".units"): ((float, str),
+    ("record.init_veloc", ".units"): ((float, str),
         re.compile(rf"Initial velocity *= *({RE_DECIMAL}) *({RE_UNITS});"),
     ),
     ("accel.shape", "accel.time_step"): ((int, float),
-        re.compile(f"([0-9]*) *points of accel data equally spaced at *({RE_DECIMAL})"),
+        re.compile(f"([0-9]*) *points of accel data equally spaced at *({RE_DECIMAL})")
     ),
     ("veloc.shape", "accel.time_step"): ((int, float),
-        re.compile(f"([0-9]*) *points of veloc data equally spaced at *({RE_DECIMAL})"),
+        re.compile(f"([0-9]*) *points of veloc data equally spaced at *({RE_DECIMAL})")
     ),
     ("displ.shape", "accel.time_step"): ((int, float),
-        re.compile(f"([0-9]*) *points of displ data equally spaced at *({RE_DECIMAL})"),
+        re.compile(f"([0-9]*) *points of displ data equally spaced at *({RE_DECIMAL})")
     ),
 }
 # fmt: on
@@ -104,7 +107,7 @@ def read_record_v2(
         with open_quake(read_file, "r", archive) as f:
             accel = np.genfromtxt(
                 f,
-                skip_header=HEADER_END_LINE+1,
+                skip_header=HEADER_END_LINE + 1,
                 max_rows=header_data["accel.shape"] // NUM_COLUMNS,
                 **parse_options,
             ).flatten()
@@ -126,14 +129,14 @@ def read_record_v2(
         typ, k = key.split(".", 1)
         if typ == "record":
             record_data.update({k: val})
-        elif typ in ["accel","veloc","displ"]:
+        elif typ in ["accel", "veloc", "displ"]:
             series_data[typ].update({k: val})
 
     record_data["file_name"] = filename.name
     return GroundMotionRecord(
-        GroundMotionSeries(accel,series_data["accel"]),
-        GroundMotionSeries(veloc,series_data["veloc"]),
-        GroundMotionSeries(displ,series_data["displ"]),
+        GroundMotionSeries(accel, series_data["accel"]),
+        GroundMotionSeries(veloc, series_data["veloc"]),
+        GroundMotionSeries(displ, series_data["displ"]),
         meta=record_data,
     )
 

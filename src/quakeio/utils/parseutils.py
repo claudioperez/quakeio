@@ -7,6 +7,7 @@ import contextlib
 @contextlib.contextmanager
 def open_quake(file, mode=None, archive=None):
     import sys
+
     if file == "-":
         if mode is None or mode == "" or "r" in mode:
             fh = sys.stdin
@@ -78,4 +79,3 @@ def get_file_type(
 ) -> str:
     if isinstance(file, io.IOBase):
         return file_type
-

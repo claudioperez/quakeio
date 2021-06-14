@@ -5,7 +5,7 @@ import numpy as np
 import scipy.integrate
 
 
-def get_time_step(series, time_series=None, time_step: float=None) -> float:
+def get_time_step(series, time_series=None, time_step:float=None) -> float:
     """
     If both `time_series` and `time_step` are None,
     `series` is checked for a `time_series` or `time_step` attribute.
@@ -48,16 +48,20 @@ def rotate_series_in_place(series, sn=None, cs=None):
     series *= np.sin(sn or (np.pi / 2 * cs))
 
 
-def arias_intensity(series, start_level=0.0, end_level=1.0, time_series=None, time_step=None):
+def arias_intensity(
+    series, start_level=0.0, end_level=1.0, time_series=None, time_step=None
+):
     time = get_time_series(series, time_series, time_step)
-    arias_factor = np.pi /2.0
+    arias_factor = np.pi / 2.0
     husid = integrate_husid(series, time)
     # Normalize
     husid_norm = husid / husid[-1]
-    idx = np.where(np.logical_and(husid_norm >= start_level, husid_norm <= end_level))[0]
+    idx = np.where(
+        np.logical_and(husid_norm >= start_level, husid_norm <= end_level)
+    )[0]
     if len(idx) < len(series):
-        husid = integrate_husid(series[idx],time)
-    
+        husid = integrate_husid(series[idx], time)
+
     raise NotImplementedError("Not implemented")
     return arias_factor * husid[-1]
 
@@ -65,5 +69,3 @@ def arias_intensity(series, start_level=0.0, end_level=1.0, time_series=None, ti
 def integrate_husid(series, time_series=None, time_step=None):
     time = get_time_series(series, time_series, time_step)
     return scipy.integrate.cumtrapz(series ** 2.0, time)
-
-

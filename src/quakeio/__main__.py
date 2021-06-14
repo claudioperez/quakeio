@@ -39,9 +39,7 @@ def cli(*args, **kwds):
         return
     if "command" in kwds:
         cmds = kwds.pop("command")
-    # if kwds["read_file"] == "-":
-    #    kwds["read_file"] = sys.stdin
-    # write_file = sys.stdout if kwds["write_file"] == "-" else kwds["write_file"]
+
     write_file = kwds["write_file"]
     del kwds["write_file"]
     motion = quakeio.read(**kwds)

@@ -1,7 +1,5 @@
-import re
-from pathlib import Path
-
-
+# Claudio Perez
+# 2021
 import numpy as np
 
 
@@ -43,14 +41,14 @@ class GroundMotionRecord(dict):
 class GroundMotionSeries(np.ndarray):
     def __new__(cls, input_array, metadata={}):
         obj = np.asarray(input_array).view(cls)
-        for k,v in metadata.items():
-            if not hasattr(obj,k):
-                setattr(obj,k,v)
+        for k, v in metadata.items():
+            if not hasattr(obj, k):
+                setattr(obj, k, v)
         return obj
 
     def __array_finalize__(self, obj):
-        for k,v in self.__dict__.items():
-            setattr(obj,k,v)
+        for k, v in self.__dict__.items():
+            setattr(obj, k, v)
 
     def plot(self, ax=None, fig=None):
         import matplotlib.pyplot as plt

@@ -3,7 +3,12 @@ __version__ = "0.0.1"
 
 from pathlib import Path
 
-from . import csmip, nga, eqsig, basic_formats
+from . import (
+    csmip,
+    # nga,
+    eqsig,
+    basic_formats
+)
 
 
 FILE_TYPES = {}
@@ -41,4 +46,3 @@ def write(write_file, ground_motion, write_format=None, *args, **kwds):
         except KeyError:
             raise ValueError("Unable to deduce output format")
     FILE_TYPES[typ]["write"](write_file, ground_motion, *args, **kwds)
-
