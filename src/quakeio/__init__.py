@@ -3,11 +3,12 @@ __version__ = "0.0.1"
 
 from pathlib import Path
 
-from . import csmip, nga, basic_formats
+from . import csmip, nga, eqsig, basic_formats
 
 
 FILE_TYPES = {}
 FILE_TYPES.update(csmip.FILE_TYPES)
+FILE_TYPES.update(eqsig.FILE_TYPES)
 FILE_TYPES.update(basic_formats.FILE_TYPES)
 
 DEFAULT_TYPES = {

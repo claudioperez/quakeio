@@ -7,6 +7,7 @@ import re
 import zipfile
 from pathlib import Path
 from typing import Union
+from collections import defaultdict
 
 import numpy as np
 
@@ -25,6 +26,19 @@ date = lambda x: x
 
 # fmt: off
 HEADER_FIELDS = {
+    #("record.date_processed",): ((str,),
+    #   re.compile(r"Processed: *(\d\d/\d\d/\d\d,)"),
+    #),
+    ("record.station_no", "record.azimuth"): ((str,str),
+        re.compile(
+            rf"Station No\. *([0-9]*) *({RE_DECIMAL}[NSEW]*, *{RE_DECIMAL}[NSEW]*)"
+        )
+    ),
+    ("record.instr_period", ".units"): ((float,str),
+        re.compile(
+            rf"Instr Period = ({RE_DECIMAL}) ({RE_UNITS}),"
+        )
+    ),
     ("record.peak_accel", ".units", ".time"): ((float, str, float),
         re.compile(
             rf"Peak *acceleration *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})"
@@ -40,20 +54,16 @@ HEADER_FIELDS = {
             rf"Peak *displacement *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})"
         ),
     ),
-    #("record.init_veloc",".units"): ((float, str),
-    #    re.compile(rf"Initial velocity *= *({RE_DECIMAL}) *({RE_UNITS});"),
-    #),
-    # "record.date_processed": (
-    #    ("value",), (date,),
-    #    re.compile(r"Processed: (\d\d/\d\d/\d\d,)"),
-    # ),
-    ("accel.shape", ".time_step"): ((int, float),
+    ("record.init_veloc",".units"): ((float, str),
+        re.compile(rf"Initial velocity *= *({RE_DECIMAL}) *({RE_UNITS});"),
+    ),
+    ("accel.shape", "accel.time_step"): ((int, float),
         re.compile(f"([0-9]*) *points of accel data equally spaced at *({RE_DECIMAL})"),
     ),
-    ("veloc.shape", ".time_step"): ((int, float),
+    ("veloc.shape", "accel.time_step"): ((int, float),
         re.compile(f"([0-9]*) *points of veloc data equally spaced at *({RE_DECIMAL})"),
     ),
-    ("displ.shape", ".time_step"): ((int, float),
+    ("displ.shape", "accel.time_step"): ((int, float),
         re.compile(f"([0-9]*) *points of displ data equally spaced at *({RE_DECIMAL})"),
     ),
 }
@@ -94,13 +104,15 @@ def read_record_v2(
         with open_quake(read_file, "r", archive) as f:
             accel = np.genfromtxt(
                 f,
-                skip_header=HEADER_END_LINE,
+                skip_header=HEADER_END_LINE+1,
                 max_rows=header_data["accel.shape"] // NUM_COLUMNS,
                 **parse_options,
             ).flatten()
+            next(f)
             veloc = np.genfromtxt(
                 f, max_rows=header_data["veloc.shape"] // NUM_COLUMNS, **parse_options
             ).flatten()
+            next(f)
             displ = np.genfromtxt(
                 f, max_rows=header_data["displ.shape"] // NUM_COLUMNS, **parse_options
             ).flatten()
@@ -109,24 +121,24 @@ def read_record_v2(
 
     # Separate out metadata
     record_data = {}
+    series_data = defaultdict(dict)
     for key, val in header_data.items():
         typ, k = key.split(".", 1)
         if typ == "record":
             record_data.update({k: val})
+        elif typ in ["accel","veloc","displ"]:
+            series_data[typ].update({k: val})
+
     record_data["file_name"] = filename.name
     return GroundMotionRecord(
-        GroundMotionSeries(accel),
-        GroundMotionSeries(veloc),
-        GroundMotionSeries(displ),
+        GroundMotionSeries(accel,series_data["accel"]),
+        GroundMotionSeries(veloc,series_data["veloc"]),
+        GroundMotionSeries(displ,series_data["displ"]),
         meta=record_data,
     )
 
 
-# ----------------------------------------------------------------------
-#
-# ----------------------------------------------------------------------
 FILE_TYPES = {
-    # Union[groundmotionevent,groundmotionrecord,groundmotionseries],
     "csmip.v1": {"type": GroundMotionRecord, "read": read_record_v2},
     "csmip.v2": {"type": GroundMotionRecord, "read": read_record_v2},
     "csmip.v3": {"type": GroundMotionRecord, "read": read_record_v2, "spec": ""},

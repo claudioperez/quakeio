@@ -35,7 +35,7 @@ def parse_sequential_fields(data, field_spec: dict, parsed_fields={}) -> dict:
         match = regex.findall(str(line))
         if match:
             prefix = ""
-            assert len(fields) == len(typs) == len(match[0])
+            assert len(fields) == len(typs) == len(match[0]), (regex, match[0])
             for field, typ, val in zip(fields, typs, match[0]):
                 if field[0] == ".":
                     key = prefix + field

@@ -41,12 +41,16 @@ class GroundMotionRecord(dict):
 
 
 class GroundMotionSeries(np.ndarray):
-    def __new__(cls, input_array, metadata: dict = {}):
+    def __new__(cls, input_array, metadata={}):
+        obj = np.asarray(input_array).view(cls)
+        for k,v in metadata.items():
+            if not hasattr(obj,k):
+                setattr(obj,k,v)
+        return obj
 
-        return np.asarray(input_array).view(cls)
-
-    def __init__(self, obj):
-        pass
+    def __array_finalize__(self, obj):
+        for k,v in self.__dict__.items():
+            setattr(obj,k,v)
 
     def plot(self, ax=None, fig=None):
         import matplotlib.pyplot as plt
