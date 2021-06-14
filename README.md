@@ -4,6 +4,15 @@
 ![Build status][build-img]
 [![Commits since latest release][gh-image]][gh-link]
 
+## Formats
+
+- [x] CSMIP
+- [x] PEER NGA
+- [ ] plain.tsv
+- [ ] plain.csv
+- [ ] mdof
+- [ ] SimCenter Event
+
 ## Examples
 
 ### Command line
@@ -66,6 +75,8 @@ Commands:
   husid;
   scale:SCALE;
   rotate:cs=ANGLE;
+  filter:<freq>;
+  spect;
 
 Formats:
   html
