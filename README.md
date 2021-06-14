@@ -8,7 +8,7 @@ QuakeIO is a library of utilities for parsing ground motion files. Interfaces ar
 
 ## Formats
 
-| Format          | read      | write   |
+| Format          | Read      | Write   |
 |-----------------|-----------|---------|
 | CSMIP           | &#9744;   | &#9744; |
 | PEER NGA        | &#9744;   | &#9744; |
@@ -90,7 +90,7 @@ Formats:
 <!-- Badge links -->
 [pypi-v-image]: https://img.shields.io/pypi/v/quakeio.img
 [pypi-v-link]: https://pypi.org/project/quakeio
-[build-img]: https://
+[build-img]: https://github.com/claudioperez/quakeio/actions/workflows/base.yml/badge.svg
 [gh-link]: https://github.com/claudioperez/quakeio/compare/0.0.0...master
 [gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/0.0.0?style=social
 
