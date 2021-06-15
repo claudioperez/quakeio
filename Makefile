@@ -13,6 +13,9 @@ install:
 	python3 setup.py develop
 	#pip install -e .
 
+test:
+	pytest
+
 api:
 	$(PDOC) --config show_source_code=False \
 	--config latex_math=True \
