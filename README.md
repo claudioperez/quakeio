@@ -2,8 +2,8 @@
 
 [![PyPI Downloads][pypi-v-image]][pypi-v-link]
 [![PyPI Version][pypi-d-image]][pypi-d-link]
-![coverage][cov-img]
-![Coverage][build-img]
+![Coverage][cov-img]
+<!-- ![Build][build-img] -->
 [![Commits since latest release][gh-image]][gh-link]
 
 QuakeIO is a library of utilities for parsing ground motion files. Interfaces are provided for Python, Matlab, and the command line.
@@ -12,12 +12,12 @@ QuakeIO is a library of utilities for parsing ground motion files. Interfaces ar
 
 | Format          | Read      | Write   |
 |-----------------|-----------|---------|
-| CSMIP           | &#9744;   | &#9744; |
-| PEER NGA        | &#9744;   | &#9744; |
-| plain.tsv       | &#9744;   | &#9744; |
-| plain.csv       | &#9744;   | &#9744; |
-| mdof            | &#9744;   | &#9744; |
-| SimCenter Event | &#9744;   | &#9744; |
+|`csmip`          | &#9744;   | &#9744; |
+|`PEER.NGA`       | &#9744;   | &#9744; |
+|`plain.tsv`      | &#9744;   | &#9744; |
+|`plain.csv`      | &#9744;   | &#9744; |
+|`mdof`           | &#9744;   | &#9744; |
+| SimCenter.Event | &#9744;   | &#9744; |
 
 ## Examples
 
@@ -90,7 +90,8 @@ Formats:
 ```
 
 <!-- Badge links -->
-[pypi-d-image]: https://img.shields.io/pypi/d/quakeio.img
+[pypi-d-image]: https://img.shields.io/pypi/dm/quakeio.img
+[license-badge]: https://img.shields.io/pypi/l/quakeio.img
 [pypi-d-link]: https://pypi.org/project/quakeio
 [pypi-v-image]: https://img.shields.io/pypi/v/quakeio.img
 [pypi-v-link]: https://pypi.org/project/quakeio

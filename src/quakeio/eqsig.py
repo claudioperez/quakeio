@@ -16,7 +16,7 @@ def read(read_file, **kwds):
     )
 
 
-def write(write_file, motion: GroundMotionSeries, /, label="eqsig data", **kwds):
+def write(write_file, motion: GroundMotionSeries, label="eqsig data", **kwds):
     print(dir(motion.accel))
     print(dir(motion))
     time_step = motion.accel.time_step
