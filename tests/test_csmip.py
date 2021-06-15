@@ -34,6 +34,17 @@ def test_peak_time():
     assert csmip_record["peak_veloc.time"] == 20.290
     assert csmip_record["peak_displ.time"] == 20.270
 
+def test_accel_data():
+    csmip_record = test_read()
+    assert csmip_record.accel[0]  == -0.000102
+    assert csmip_record.accel[-1] ==  0.000105
+
+def test_veloc_data():
+    csmip_record = test_read()
+    assert csmip_record.veloc[0]  == 0.0000950
+    assert csmip_record.veloc[-1] == 0.0001009
+
+
 
 # csmip_record = quakeio.GroundMotionRecord(csmip_dir/"chan001.v2")
 
