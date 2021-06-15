@@ -2,7 +2,7 @@
 
 [![PyPI Downloads][pypi-v-image]][pypi-v-link]
 [![PyPI Version][pypi-d-image]][pypi-d-link]
-![Coverage][cov-img]
+![][cov-img]
 <!-- ![Build][build-img] -->
 [![Commits since latest release][gh-image]][gh-link]
 
@@ -12,9 +12,13 @@ QuakeIO is a library of utilities for parsing ground motion files. Interfaces ar
 
 | Format          | Read      | Write   |
 |-----------------|-----------|---------|
+|`[quakeio.]json` | &#9745;   | &#9745; |
 |`csmip`          | &#9744;   | &#9744; |
-|`PEER.NGA`       | &#9744;   | &#9744; |
+|`csmip.v2`       | &#9745;   | &#9744; |
+|`eqsig`          | &#9745;   | &#9745; |
+|`PEER.NGA`       | &#9745;   | &#9744; |
 |`plain.tsv`      | &#9744;   | &#9744; |
+|`opensees`       | &#9744;   | &#9744; |
 |`plain.csv`      | &#9744;   | &#9744; |
 |`mdof`           | &#9744;   | &#9744; |
 | SimCenter.Event | &#9744;   | &#9744; |
@@ -90,13 +94,13 @@ Formats:
 ```
 
 <!-- Badge links -->
-[pypi-d-image]: https://img.shields.io/pypi/dm/quakeio.img
-[license-badge]: https://img.shields.io/pypi/l/quakeio.img
+[pypi-d-image]: https://img.shields.io/pypi/dm/quakeio.svg
+[license-badge]: https://img.shields.io/pypi/l/quakeio.svg
 [pypi-d-link]: https://pypi.org/project/quakeio
-[pypi-v-image]: https://img.shields.io/pypi/v/quakeio.img
+[pypi-v-image]: https://img.shields.io/pypi/v/quakeio.svg
 [pypi-v-link]: https://pypi.org/project/quakeio
 [build-img]: https://github.com/claudioperez/quakeio/actions/workflows/base.yml/badge.svg
-[cov-img]: ./etc/coverage/cov.svg
-[gh-link]: https://github.com/claudioperez/quakeio/compare/0.0.0...master
-[gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/0.0.0?style=social
+[cov-img]: https://raw.githubusercontent.com/claudioperez/quakeio/master/etc/coverage/cov.svg
+[gh-link]: https://github.com/claudioperez/quakeio/compare/0.0.2...master
+[gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/0.0.2?style=social
 
