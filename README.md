@@ -1,8 +1,9 @@
 # quake-io
 
-[![PyPI Version][pypi-v-image]][pypi-v-link]
+[![PyPI Downloads][pypi-v-image]][pypi-v-link]
 [![PyPI Version][pypi-d-image]][pypi-d-link]
-![Build status][build-img]
+![coverage][cov-img]
+![Coverage][build-img]
 [![Commits since latest release][gh-image]][gh-link]
 
 QuakeIO is a library of utilities for parsing ground motion files. Interfaces are provided for Python, Matlab, and the command line.
@@ -94,6 +95,7 @@ Formats:
 [pypi-v-image]: https://img.shields.io/pypi/v/quakeio.img
 [pypi-v-link]: https://pypi.org/project/quakeio
 [build-img]: https://github.com/claudioperez/quakeio/actions/workflows/base.yml/badge.svg
+[cov-img]: ./etc/coverage/cov.svg
 [gh-link]: https://github.com/claudioperez/quakeio/compare/0.0.0...master
 [gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/0.0.0?style=social
 
