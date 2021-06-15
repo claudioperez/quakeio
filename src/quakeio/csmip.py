@@ -82,7 +82,7 @@ def read_event(read_file, **kwds):
     records = []
     for file in archive.namelist():
         if file.endswith(".v2"):
-            records.append(read_record_v2(file, archive))
+            records.append(read_record_v2(file, archive, **kwds))
     metadata = {}
     return GroundMotionEvent("file_name", *records, **metadata)
 
@@ -120,7 +120,7 @@ def read_record_v2(
                 f, max_rows=header_data["displ.shape"] // NUM_COLUMNS, **parse_options
             ).flatten()
     else:
-        accel, veloc, displ = None, None, None
+        accel, veloc, displ = [], [], []
 
     # Separate out metadata
     record_data = {}
@@ -159,3 +159,4 @@ def read(read_file, input_format=None):
     # file_type = get_file_type(file,file_type,"csmip")
     # if isinstance(
     pass
+

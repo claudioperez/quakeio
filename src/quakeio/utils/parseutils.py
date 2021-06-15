@@ -1,4 +1,5 @@
 import io
+from os import PathLike
 from pathlib import Path
 from typing import Union, IO
 import contextlib
@@ -13,18 +14,19 @@ def open_quake(file, mode=None, archive=None):
             fh = sys.stdin
         else:
             fh = sys.stdout
-    elif not archive:
+    elif not archive and isinstance(file, (PathLike, str)):
         fh = open(file, mode)
-    else:
+    elif archive:
         fh = archive.open(file, mode)
-
+    else:
+        fh = file
     # if file != "-":
     #     yield fh
     #     fh.close()
     try:
         yield fh
     finally:
-        if file != "-":
+        if isinstance(file, str) and file != "-":
             fh.close()
 
 

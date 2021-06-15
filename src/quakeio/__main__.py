@@ -22,7 +22,7 @@ def build_parser():
         "--to",
         dest="write_format",
         help="Specity output file format",
-        default="json.record",
+        default="json",
     )
     parser.add_argument("-s", "--scale", help="Scale ground motions by factor FACTOR")
 
@@ -33,19 +33,20 @@ def build_parser():
     return parser
 
 
-def cli(*args, **kwds):
-    if kwds["version"]:
+def cli(*args, write_file="-", version=False, command=None, **kwds):
+    if version:
         print(quakeio.__version__)
         return
-    if "command" in kwds:
-        cmds = kwds.pop("command")
 
-    write_file = kwds["write_file"]
-    del kwds["write_file"]
+    # write_file = kwds["write_file"]
+    # del kwds["write_file"]
     motion = quakeio.read(**kwds)
     quakeio.write(write_file, motion, **kwds)
     print("\n")
 
+def list_args(*args):
+    args = build_parser().parse_args()
+    return cli(**vars(args))
 
 def main():
     args = build_parser().parse_args()
