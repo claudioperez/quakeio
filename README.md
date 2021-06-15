@@ -1,6 +1,7 @@
 # quake-io
 
 [![PyPI Version][pypi-v-image]][pypi-v-link]
+[![PyPI Version][pypi-d-image]][pypi-d-link]
 ![Build status][build-img]
 [![Commits since latest release][gh-image]][gh-link]
 
@@ -88,6 +89,8 @@ Formats:
 ```
 
 <!-- Badge links -->
+[pypi-d-image]: https://img.shields.io/pypi/d/quakeio.img
+[pypi-d-link]: https://pypi.org/project/quakeio
 [pypi-v-image]: https://img.shields.io/pypi/v/quakeio.img
 [pypi-v-link]: https://pypi.org/project/quakeio
 [build-img]: https://github.com/claudioperez/quakeio/actions/workflows/base.yml/badge.svg
