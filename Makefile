@@ -12,7 +12,9 @@ PDOC = pdoc --template-dir $(STYDIR) -o $(DOCDIR)
 install:
 	python3 setup.py develop
 	#pip install -e .
-
+cov:
+	coverage run --source=. -m pytest
+	coverage-badge > ./etc/coverage/cov.svg
 test:
 	pytest
 
