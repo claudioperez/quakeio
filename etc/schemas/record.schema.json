@@ -1,0 +1,185 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "quakeIO Ground Motion Record schema",
+    "description": "quakeIO Ground Motion Record schema.",
+    "examples": [
+        {
+            "station_no": "58658",
+            "azimuth": "37.691N, 122.099W",
+            "instr_period": 0.0047,
+            "instr_period.units": "sec",
+            "peak_accel": 17.433,
+            "peak_accel.units": "cm/sec/sec",
+            "peak_accel.time": 20.27,
+            "peak_veloc": 0.205,
+            "peak_veloc.units": "cm/sec",
+            "peak_veloc.time": 20.29,
+            "peak_displ": -0.004,
+            "peak_displ.units": "cm",
+            "peak_displ.time": 20.27,
+            "init_veloc": 0.0,
+            "init_veloc.units": "cm/sec",
+            "file_name": "chan001.v2"
+        }
+    ],
+    "required": [
+        "azimuth",
+        "instr_period",
+        "instr_period.units",
+        "peak_accel",
+        "peak_accel.units",
+        "peak_accel.time",
+        "peak_veloc",
+        "peak_veloc.units",
+        "peak_veloc.time",
+        "peak_displ",
+        "peak_displ.units",
+        "peak_displ.time"
+    ],
+    "properties": {
+        "station_no": {
+            "$id": "#/properties/station_no",
+            "type": "string",
+            "title": "The station_no schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "58658"
+            ]
+        },
+        "azimuth": {
+            "$id": "#/properties/azimuth",
+            "type": "string",
+            "title": "The azimuth schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "37.691N, 122.099W"
+            ]
+        },
+        "instr_period": {
+            "$id": "#/properties/instr_period",
+            "type": "number",
+            "title": "The instr_period schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0.0,
+            "examples": [
+                0.0047
+            ]
+        },
+        "instr_period.units": {
+            "$id": "#/properties/instr_period.units",
+            "type": "string",
+            "title": "The instr_period.units schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "sec"
+            ]
+        },
+        "peak_accel": {
+            "$id": "#/properties/peak_accel",
+            "type": "number",
+            "title": "The peak_accel schema",
+            "examples": [
+                17.433
+            ]
+        },
+        "peak_accel.units": {
+            "$id": "#/properties/peak_accel.units",
+            "type": "string",
+            "title": "The peak_accel.units schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "cm/sec/sec"
+            ]
+        },
+        "peak_accel.time": {
+            "$id": "#/properties/peak_accel.time",
+            "type": "number",
+            "title": "The peak_accel.time schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0.0,
+            "examples": [
+                20.27
+            ]
+        },
+        "peak_veloc": {
+            "$id": "#/properties/peak_veloc",
+            "type": "number",
+            "title": "The peak_veloc schema",
+            "examples": [
+                0.205
+            ]
+        },
+        "peak_veloc.units": {
+            "$id": "#/properties/peak_veloc.units",
+            "type": "string",
+            "title": "The peak_veloc.units schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "cm/sec"
+            ]
+        },
+        "peak_veloc.time": {
+            "$id": "#/properties/peak_veloc.time",
+            "type": "number",
+            "title": "The peak_veloc.time schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0.0,
+            "examples": [
+                20.29
+            ]
+        },
+        "peak_displ": {
+            "$id": "#/properties/peak_displ",
+            "type": "number",
+            "title": "The peak_displ schema"
+        },
+        "peak_displ.units": {
+            "$id": "#/properties/peak_displ.units",
+            "type": "string",
+            "title": "The peak_displ.units schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "cm"
+            ]
+        },
+        "peak_displ.time": {
+            "$id": "#/properties/peak_displ.time",
+            "type": "number",
+            "title": "The peak_displ.time schema",
+            "examples": [
+                20.27
+            ]
+        },
+        "init_veloc": {
+            "$id": "#/properties/init_veloc",
+            "type": "number",
+            "title": "Initial velocity",
+            "default": 0.0
+        },
+        "init_veloc.units": {
+            "$id": "#/properties/init_veloc.units",
+            "type": "string",
+            "title": "The init_veloc.units schema",
+            "description": "Units",
+            "default": "",
+            "examples": ["cm/sec"]
+        },
+        "file_name": {
+            "$id": "#/properties/file_name",
+            "type": "string",
+            "title": "The file_name schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": ""
+        }
+    },
+    "additionalProperties": true
+}
+

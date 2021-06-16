@@ -18,47 +18,47 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// $Revision: 1.3 $
+// $Revision: 1.2 $
 // $Date: 2010-02-04 00:34:29 $
-// $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/TrigSeries.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PulseSeries.h,v $
 
+#ifndef PulseSeries_h
+#define PulseSeries_h
 
-#ifndef TrigSeries_h
-#define TrigSeries_h
-
-// Written: MHS 
-// Created: July 2000
+// Written: Andreas Schellenberg (andreas.schellenberg@gmx.net)
+// Created: 02/04
 // Revision: A
 //
-// Purpose: This file contains the class definition for TrigSeries.
-// TrigSeries is a concrete class. A TrigSeries object provides
-// a sine time series. the factor is given by the pseudoTime (x),
-// pulse period (T), phase shift (phi), i.e. by sin(2*PI*(x-xo)/T + phi),
+// Purpose: This file contains the class definition for PulseSeries.
+// PulseSeries is a concrete class. A PulseSeries object provides
+// a pulse time series. The factor is given by the pseudoTime (t),
+// pulse period (T), pulse width (pw) and phase shift (phi),
 // and a constant factor provided in the constructor,
 // the duration by tStart and tFinal;
 //
-// What: "@(#) TrigSeries.h, revA"
+// What: "@(#) PulseSeries.h, revA"
 
 #include <TimeSeries.h>
 
-class TrigSeries : public TimeSeries
+class PulseSeries : public TimeSeries
 {
 public:
     // constructors
-    TrigSeries(int tag,
-        double tStart, 
+    PulseSeries(int tag,
+        double tStart,
         double tFinish,
-        double period, 
-        double phaseShift, 
+        double period,
+        double pWidth,
+        double phaseShift,
         double cFactor = 1.0,
         double zeroShift = 0.0);
 
-    TrigSeries();
+    PulseSeries();
 
     // destructor
-    ~TrigSeries();
+    ~PulseSeries();
 
-    TimeSeries *getCopy(); 
+    TimeSeries *getCopy();
 
     // method to get load factor
     double getFactor(double pseudoTime);
@@ -78,10 +78,11 @@ protected:
 private:
     double tStart;      // start time of time series (sec)
     double tFinish;     // end time of time series (sec)
-    double period;      // period of trig series (sec)
-    double phaseShift;  // phase shift of trig series (rad)
-    double cFactor;     // amplitude of trig series
-    double zeroShift;   // zero shift of trig series
+    double period;      // period of pulse series (sec)
+    double pWidth;      // width of pulse series [0..1] 
+    double phaseShift;  // phase shift of pulse series (sec)
+    double cFactor;     // amplitude of pulse series
+    double zeroShift;   // zero shift of pulse series
 };
 
 #endif
