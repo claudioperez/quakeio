@@ -86,7 +86,6 @@ def read_event(read_file, **kwds):
     metadata = {}
     return GroundMotionEvent("file_name", *records, **metadata)
 
-
 def read_record_v2(
     read_file, archive: zipfile.ZipFile = None, summarize=False, **kwds
 ) -> GroundMotionRecord:
@@ -97,6 +96,7 @@ def read_record_v2(
     # Parse header fields
     with open_quake(read_file, "r", archive) as f:
         header_data = parse_sequential_fields(f, HEADER_FIELDS)
+
     parse_options = dict(
         delimiter=10,  # fields are 10 chars wide
     )
@@ -122,7 +122,7 @@ def read_record_v2(
     else:
         accel, veloc, displ = [], [], []
 
-    # Separate out metadata
+    # Extract metadata
     record_data = {}
     series_data = defaultdict(dict)
     for key, val in header_data.items():

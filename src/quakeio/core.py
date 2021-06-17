@@ -3,13 +3,15 @@
 import numpy as np
 
 
-class RealNumber(float):
-    def __new__(cls, value, units=None):
-        return float.__init__(cls, value)
+#class RealNumber(float):
+#    def __new__(cls, value, units=None):
+#        return float.__init__(cls, value)
+#
+#    def __init__(self, value, units=None, time=None):
+#        self.units = units
 
-    def __init__(self, value, units=None, time=None):
-        self.units = units
-
+class GroundMotionParser:
+    pass
 
 class GroundMotionEvent(dict):
     """
@@ -18,13 +20,13 @@ class GroundMotionEvent(dict):
 
     def __init__(self, key, *args, event_date=None, **kwds):
         dict.__init__(self, **{record[key]: record for record in args})
+        #self.update({
+        #    "event_accel_peak": max([r["accel_peak"] for r in self.values()])
+        #})
         self.event_date = event_date
 
     def serialize(self, serialize_data=True) -> dict:
         return {k: v.serialize() for k,v in self.items()}
-        # for record in self.values():
-        #     record.serialize()
-
 
 class GroundMotionRecord(dict):
     def __init__(self, accel, veloc, displ, meta={}):
@@ -35,33 +37,32 @@ class GroundMotionRecord(dict):
 
     def serialize(self, serialize_data=True) -> dict:
         ret = dict(self)
-        if serialize_data:
-            ret.update({
-                **self.accel.serialize("accel"),
-                **self.veloc.serialize("veloc"),
-                **self.displ.serialize("displ")
-            })
+        ret.update({
+            **self.accel.serialize("accel", serialize_data=serialize_data),
+            **self.veloc.serialize("veloc", serialize_data=serialize_data),
+            **self.displ.serialize("displ", serialize_data=serialize_data)
+        })
         return ret
         
-        #self["accel"] = self.accel
-        #self["veloc"] = self.veloc
-        #self["displ"] = self.displ
-
 
 class GroundMotionSeries(np.ndarray):
     def __new__(cls, input_array, metadata={}):
         obj = np.asarray(input_array).view(cls)
+
         for k, v in metadata.items():
             if not hasattr(obj, k):
                 setattr(obj, k, v)
         return obj
 
-    def serialize(self,base):
+    def serialize(self,key=None,serialize_data=True):
+        if key is None:
+            key = self.series_type
         attributes =  {
-            ".".join((base,k)): v 
+            ".".join((key, k)): v
                 for k,v in self.__dict__.items() if k[0] != "_"
         }
-        attributes.update({base: list(self)})
+        if serialize_data:
+            attributes.update({key: list(self)})
         return attributes
 
     def __array_finalize__(self, obj):
@@ -74,3 +75,4 @@ class GroundMotionSeries(np.ndarray):
         if ax is None:
             fig, ax = plt.subplots()
         ax.plot(self)
+
