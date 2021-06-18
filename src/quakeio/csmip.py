@@ -106,7 +106,6 @@ def read_event(read_file, **kwds):
         loc = to_key(comp["location"])
         if dirn in records[loc]:
             loc += "_alt"
-        print(loc)
         records[loc][dirn] = comp
     metadata = {}
     return GroundMotionEvent(records, **metadata)

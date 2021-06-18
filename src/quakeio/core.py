@@ -14,6 +14,9 @@ class GroundMotionEvent(dict):
     def serialize(self, serialize_data=True) -> dict:
         return {k: v.serialize() for k, v in self.items()}
 
+def rotate_horizontal(angle,x,y,overwrite=True):
+    vect = np.asarray([x,y])
+    np.matmul(rotation, vect, out = vect)
 
 class GroundMotionRecord(dict):
     """
@@ -25,9 +28,22 @@ class GroundMotionRecord(dict):
     def serialize(self, serialize_data=True) -> dict:
         return {k: v.serialize() for k, v in self.items()}
 
-    def rotate(self, horizontal_angle, *args):
-        #np.array([[np.sin(), @np.array([[self["long"]], [self["trans"]])
-        pass
+    def rotate(self, angle=None, rotation=None):
+        rx, ry = np.array([
+            [ np.cos(angle), np.sin(angle)],
+            [-np.sin(angle), np.cos(angle)]
+        ]) if not rotation else rotation
+
+        for attr in ["accel", "veloc", "displ"]:
+            x = getattr(self["long"], attr)
+            y = getattr(self["tran"], attr)
+            X = np.array([x,y])
+            #x, y = rotate_horizontal(horizontal_angle, x, y)
+            x[:] = np.dot(rx, X)
+            y[:] = np.dot(ry, X)
+            #setattr(self["long"], attr, x)
+            #setattr(self["tran"], attr, y)
+        return self
 
 
 class GroundMotionComponent(dict):
@@ -57,7 +73,8 @@ class GroundMotionSeries(np.ndarray):
             if not hasattr(obj, k):
                 setattr(obj, k, v)
         return obj
-
+    def __repr__(self):
+        return f"<quakeio.GroundMotionSeries>"
     def serialize(self, key=None, serialize_data=True):
         if key is None:
             key = self.series_type
@@ -78,3 +95,4 @@ class GroundMotionSeries(np.ndarray):
         if ax is None:
             fig, ax = plt.subplots()
         ax.plot(self)
+
