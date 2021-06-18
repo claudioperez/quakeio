@@ -1,9 +1,6 @@
 import numpy as np
 
-from quakeio.core import (
-    GroundMotionSeries,
-    GroundMotionRecord
-)
+from quakeio.core import GroundMotionSeries, GroundMotionComponent
 from quakeio.utils.parseutils import open_quake
 
 
@@ -11,7 +8,7 @@ def read(read_file, **kwds):
     with open_quake(read_file, "r") as f:
         time_step = next(next(f))
         accel = np.genfromtxt(f, skip_header=1, delimiter=",", usecols=0)
-    return GroundMotionRecord(
+    return GroundMotionComponent(
         GroundMotionSeries(accel), meta={"accel.time_step": time_step}
     )
 

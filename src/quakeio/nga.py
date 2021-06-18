@@ -14,13 +14,9 @@ def read_nga(read_file, *args, **kwds):
     dt = float(RE_TIME_STEP.search(header[-1]).group(1).strip())
     series_type = header[-2][:5].lower()
     accel = np.genfromtxt(read_file, skip_header=4, skip_footer=1).flatten()
-    return GroundMotionSeries(accel, dict(
-        time_step=dt,
-        series_type=series_type,
-        units="g"
-    ))
-
-    
+    return GroundMotionSeries(
+        accel, dict(time_step=dt, series_type=series_type, units="g")
+    )
 
 
 FILE_TYPES = {
@@ -29,4 +25,3 @@ FILE_TYPES = {
         "type": GroundMotionSeries,
     }
 }
-

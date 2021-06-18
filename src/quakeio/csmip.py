@@ -13,6 +13,7 @@ import numpy as np
 from .core import (
     GroundMotionEvent,
     GroundMotionRecord,
+    GroundMotionComponent,
     GroundMotionSeries,
     # RealNumber
 )
@@ -20,16 +21,18 @@ from .utils.parseutils import (
     parse_sequential_fields,
     open_quake,
     RE_DECIMAL,  # Regular expression for extracting decimal values
-    RE_UNITS,    # Regular expression for extracting units
-    maybe_t
+    RE_UNITS,  # Regular expression for extracting units
+    CRE_WHITE,
+    maybe_t,
 )
 
 # Module constants
 NUM_COLUMNS = 8
 HEADER_END_LINE = 45
 
+to_key = lambda strng: strng.replace(" ", "_").lower()
 
-words = lambda x: str(x).strip()
+words = lambda x: CRE_WHITE.sub(" ", str(x)).strip()
 
 # fmt: off
 HEADER_FIELDS = {
@@ -43,7 +46,7 @@ HEADER_FIELDS = {
     ("record.channel", "record.component", "record.station.channel", "record.location"): (
         (str, str, maybe_t("Sta Chn: ([0-9]*)", words), words),
         re.compile(
-            rf"Chan *([0-9]*): *([A-z]*) *(.*) *Location: *([A-z 0-9]*)"
+            rf"Chan *([0-9]*): *([A-z]*) *(.*) *Location: *([ -~]*)\s"
         )
     ),
     # line 11
@@ -91,16 +94,27 @@ def read_event(read_file, **kwds):
     """
     zippath = Path(read_file)
     archive = zipfile.ZipFile(zippath)
-    records = []
+    components = []
     for file in archive.namelist():
         if file.endswith(".v2"):
-            records.append(read_record_v2(file, archive, **kwds))
+            components.append(read_record_v2(file, archive, **kwds))
+
+    locations = set(c["location"] for c in components)
+    records = defaultdict(GroundMotionRecord)
+    for comp in components:
+        dirn = to_key(comp["component"])
+        loc = to_key(comp["location"])
+        if dirn in records[loc]:
+            loc += "_alt"
+        print(loc)
+        records[loc][dirn] = comp
     metadata = {}
-    return GroundMotionEvent("file_name", records, **metadata)
+    return GroundMotionEvent(records, **metadata)
+
 
 def read_record_v2(
     read_file, archive: zipfile.ZipFile = None, summarize=False, **kwds
-) -> GroundMotionRecord:
+) -> GroundMotionComponent:
     """
     Read a ground motion record using the CSMIP Volume 2 format
     """
@@ -145,7 +159,7 @@ def read_record_v2(
             series_data[typ].update({k: val})
 
     record_data["file_name"] = filename.name
-    return GroundMotionRecord(
+    return GroundMotionComponent(
         GroundMotionSeries(accel, series_data["accel"]),
         GroundMotionSeries(veloc, series_data["veloc"]),
         GroundMotionSeries(displ, series_data["displ"]),
@@ -154,9 +168,9 @@ def read_record_v2(
 
 
 FILE_TYPES = {
-    "csmip.v1": {"type": GroundMotionRecord, "read": read_record_v2},
-    "csmip.v2": {"type": GroundMotionRecord, "read": read_record_v2},
-    "csmip.v3": {"type": GroundMotionRecord, "read": read_record_v2, "spec": ""},
+    "csmip.v1": {"type": GroundMotionComponent, "read": read_record_v2},
+    "csmip.v2": {"type": GroundMotionComponent, "read": read_record_v2},
+    "csmip.v3": {"type": GroundMotionComponent, "read": read_record_v2, "spec": ""},
     "csmip.zip": {"type": GroundMotionEvent, "read": read_event},
 }
 
@@ -171,4 +185,3 @@ def read(read_file, input_format=None):
     # file_type = get_file_type(file,file_type,"csmip")
     # if isinstance(
     pass
-

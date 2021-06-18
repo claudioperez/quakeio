@@ -5,7 +5,7 @@ import numpy as np
 import scipy.integrate
 
 
-def get_time_step(series, time_series=None, time_step:float=None) -> float:
+def get_time_step(series, time_series=None, time_step: float = None) -> float:
     """
     If both `time_series` and `time_step` are None,
     `series` is checked for a `time_series` or `time_step` attribute.
@@ -56,9 +56,9 @@ def arias_intensity(
     husid = integrate_husid(series, time)
     # Normalize
     husid_norm = husid / husid[-1]
-    idx = np.where(
-        np.logical_and(husid_norm >= start_level, husid_norm <= end_level)
-    )[0]
+    idx = np.where(np.logical_and(husid_norm >= start_level, husid_norm <= end_level))[
+        0
+    ]
     if len(idx) < len(series):
         husid = integrate_husid(series[idx], time)
 
