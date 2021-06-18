@@ -18,25 +18,35 @@ from .core import (
 )
 from .utils.parseutils import (
     parse_sequential_fields,
-    open_quake
+    open_quake,
+    RE_DECIMAL,  # Regular expression for extracting decimal values
+    RE_UNITS,    # Regular expression for extracting units
+    maybe_t
 )
 
 # Module constants
 NUM_COLUMNS = 8
 HEADER_END_LINE = 45
 
-# Regular expression for extracting decimal number
-RE_DECIMAL = "[-]?[0-9]*[.][0-9]*"
-# Regular expression for extracting units
-RE_UNITS = "[a-z,/,*,0-9]*"
+
+words = lambda x: str(x).strip()
 
 # fmt: off
 HEADER_FIELDS = {
+    # line 6
     ("record.station_no", "record.azimuth"): ((str, str),
         re.compile(
             rf"Station No\. *([0-9]*) *({RE_DECIMAL}[NSEW]*, *{RE_DECIMAL}[NSEW]*)"
         )
     ),
+    # line 8
+    ("record.channel", "record.component", "record.station.channel", "record.location"): (
+        (str, str, maybe_t("Sta Chn: ([0-9]*)", words), words),
+        re.compile(
+            rf"Chan *([0-9]*): *([A-z]*) *(.*) *Location: *([A-z 0-9]*)"
+        )
+    ),
+    # line 11
     ("record.instr_period", ".units"): ((float, str),
         re.compile(
             rf"Instr Period = ({RE_DECIMAL}) ({RE_UNITS}),"
@@ -57,8 +67,10 @@ HEADER_FIELDS = {
             rf"Peak *displacement *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})"
         )
     ),
-    ("record.init_veloc", ".units"): ((float, str),
-        re.compile(rf"Initial velocity *= *({RE_DECIMAL}) *({RE_UNITS});"),
+    ("record.init_veloc", ".units", "record.init_displ", ".units"): ((float, str, float, str),
+        re.compile(
+            rf"Initial velocity *= *({RE_DECIMAL}) *({RE_UNITS}); *Initial displacement *= *({RE_DECIMAL}) *({RE_UNITS})"
+        )
     ),
     ("accel.shape", "accel.time_step"): ((int, float),
         re.compile(f"([0-9]*) *points of accel data equally spaced at *({RE_DECIMAL})")
@@ -84,7 +96,7 @@ def read_event(read_file, **kwds):
         if file.endswith(".v2"):
             records.append(read_record_v2(file, archive, **kwds))
     metadata = {}
-    return GroundMotionEvent("file_name", *records, **metadata)
+    return GroundMotionEvent("file_name", records, **metadata)
 
 def read_record_v2(
     read_file, archive: zipfile.ZipFile = None, summarize=False, **kwds

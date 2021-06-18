@@ -77,7 +77,7 @@ Options:
 
 -x/--exclude FIELD
 
--M/--metadata=KEY[:VALUE]
+-m/--metadata=KEY[:VALUE]
 
 Commands:
   husid;

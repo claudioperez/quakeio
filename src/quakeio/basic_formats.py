@@ -1,5 +1,8 @@
 import json
+from copy import copy
+from pathlib import Path
 
+from quakeio.core import GroundMotionRecord, GroundMotionEvent
 from quakeio.utils.parseutils import open_quake
 
 class Unused: pass
@@ -31,12 +34,36 @@ def read_yaml(read_file, **k):
 def write_yaml(write_file, ground_motion, summarize=True, **kwds):
     import yaml
 
+    ground_motion = write_pretty(ground_motion)
     ground_motion = ground_motion.serialize(serialize_data = not summarize)
     # if not summarize:
     #     ground_motion = ground_motion.serialize()
 
+
     with open_quake(write_file, "w") as f:
         yaml.dump(ground_motion, f)
+
+
+
+def write_pretty(data):
+    output = copy(data)
+    schema_dir = Path(__file__).parents[2]/"etc/schemas"
+    schema_file = schema_dir/"record.schema.json"
+    with open(schema_file,"r") as f:
+        schema = json.load(f)["properties"]
+    if isinstance(data, GroundMotionRecord):
+        for k in data:
+            if k in schema and "units" not in k:
+                output[schema[k]["title"]] = output.pop(k)
+    elif isinstance(data, GroundMotionEvent):
+        for name, event in data.items():
+            print(event)
+            output[name] = copy(event)
+            for k,v in event.items():
+                if k in schema and "units" not in k:
+                    output[name][schema[k]["title"]] = output[name].pop(k)
+
+    return output
 
 
 FILE_TYPES = {

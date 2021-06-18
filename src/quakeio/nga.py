@@ -11,7 +11,6 @@ RE_TIME_STEP = re.compile(r"DT=\s+(.*)SEC")
 def read_nga(read_file, *args, **kwds):
     with open_quake(read_file, "r") as f:
         header = [next(f) for _ in range(4)]
-    print(header)
     dt = float(RE_TIME_STEP.search(header[-1]).group(1).strip())
     series_type = header[-2][:5].lower()
     accel = np.genfromtxt(read_file, skip_header=4, skip_footer=1).flatten()

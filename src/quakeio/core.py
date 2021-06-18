@@ -18,8 +18,8 @@ class GroundMotionEvent(dict):
     Container of GroundMotionRecord objects
     """
 
-    def __init__(self, key, *args, event_date=None, **kwds):
-        dict.__init__(self, **{record[key]: record for record in args})
+    def __init__(self, key, records, event_date=None, **kwds):
+        dict.__init__(self, **{record[key]: record for record in records})
         #self.update({
         #    "event_accel_peak": max([r["accel_peak"] for r in self.values()])
         #})

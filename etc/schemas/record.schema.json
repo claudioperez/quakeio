@@ -21,6 +21,8 @@
             "peak_displ.time": 20.27,
             "init_veloc": 0.0,
             "init_veloc.units": "cm/sec",
+            "init_displ": 0.0,
+            "init_displ.units": "cm",
             "file_name": "chan001.v2"
         }
     ],
@@ -42,7 +44,7 @@
         "station_no": {
             "$id": "#/properties/station_no",
             "type": "string",
-            "title": "The station_no schema",
+            "title": "Station number",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
             "examples": [
@@ -52,17 +54,15 @@
         "azimuth": {
             "$id": "#/properties/azimuth",
             "type": "string",
-            "title": "The azimuth schema",
+            "title": "Azimuth",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
-            "examples": [
-                "37.691N, 122.099W"
-            ]
+            "examples": ["37.691N, 122.099W"]
         },
         "instr_period": {
             "$id": "#/properties/instr_period",
             "type": "number",
-            "title": "The instr_period schema",
+            "title": "Instrument period",
             "description": "An explanation about the purpose of this instance.",
             "default": 0.0,
             "examples": [
@@ -72,7 +72,7 @@
         "instr_period.units": {
             "$id": "#/properties/instr_period.units",
             "type": "string",
-            "title": "The instr_period.units schema",
+            "title": "Instrument period units",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
             "examples": [
@@ -82,7 +82,7 @@
         "peak_accel": {
             "$id": "#/properties/peak_accel",
             "type": "number",
-            "title": "The peak_accel schema",
+            "title": "Peak acceleration",
             "examples": [
                 17.433
             ]
@@ -90,8 +90,7 @@
         "peak_accel.units": {
             "$id": "#/properties/peak_accel.units",
             "type": "string",
-            "title": "The peak_accel.units schema",
-            "description": "An explanation about the purpose of this instance.",
+            "title": "Peak acceleration units",
             "default": "",
             "examples": [
                 "cm/sec/sec"
@@ -100,8 +99,7 @@
         "peak_accel.time": {
             "$id": "#/properties/peak_accel.time",
             "type": "number",
-            "title": "The peak_accel.time schema",
-            "description": "An explanation about the purpose of this instance.",
+            "title": "Time of peak acceleration",
             "default": 0.0,
             "examples": [
                 20.27
@@ -110,7 +108,7 @@
         "peak_veloc": {
             "$id": "#/properties/peak_veloc",
             "type": "number",
-            "title": "The peak_veloc schema",
+            "title": "Peak velocity",
             "examples": [
                 0.205
             ]
@@ -118,8 +116,7 @@
         "peak_veloc.units": {
             "$id": "#/properties/peak_veloc.units",
             "type": "string",
-            "title": "The peak_veloc.units schema",
-            "description": "An explanation about the purpose of this instance.",
+            "title": "peak_veloc.units",
             "default": "",
             "examples": [
                 "cm/sec"
@@ -128,24 +125,18 @@
         "peak_veloc.time": {
             "$id": "#/properties/peak_veloc.time",
             "type": "number",
-            "title": "The peak_veloc.time schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "examples": [
-                20.29
-            ]
+            "title": "Time of peak velocity",
+            "default": 0.0
         },
         "peak_displ": {
             "$id": "#/properties/peak_displ",
             "type": "number",
-            "title": "The peak_displ schema"
+            "title": "Peak displacement"
         },
         "peak_displ.units": {
             "$id": "#/properties/peak_displ.units",
             "type": "string",
-            "title": "The peak_displ.units schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
+            "title": "peak_displ.units",
             "examples": [
                 "cm"
             ]
@@ -153,10 +144,23 @@
         "peak_displ.time": {
             "$id": "#/properties/peak_displ.time",
             "type": "number",
-            "title": "The peak_displ.time schema",
+            "title": "Time of peak displacement",
             "examples": [
                 20.27
             ]
+        },
+        "init_displ": {
+            "$id": "#/properties/init_displ",
+            "type": "number",
+            "title": "Initial displacement",
+            "default": 0.0
+        },
+        "init_displ.units": {
+            "$id": "#/properties/init_displ.units",
+            "type": "string",
+            "title": "init_displ.units",
+            "description": "Units",
+            "examples": ["cm/sec"]
         },
         "init_veloc": {
             "$id": "#/properties/init_veloc",
@@ -167,7 +171,7 @@
         "init_veloc.units": {
             "$id": "#/properties/init_veloc.units",
             "type": "string",
-            "title": "The init_veloc.units schema",
+            "title": "init_veloc.units",
             "description": "Units",
             "default": "",
             "examples": ["cm/sec"]
@@ -175,8 +179,7 @@
         "file_name": {
             "$id": "#/properties/file_name",
             "type": "string",
-            "title": "The file_name schema",
-            "description": "An explanation about the purpose of this instance.",
+            "title": "Source file",
             "default": ""
         }
     },
