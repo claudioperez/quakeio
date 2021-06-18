@@ -19,9 +19,9 @@ class GroundMotionEvent(dict):
     def serialize(self, serialize_data=True) -> dict:
         return {k: v.serialize() for k, v in self.items()}
 
-def rotate_horizontal(angle,x,y,overwrite=True):
-    vect = np.asarray([x,y])
-    np.matmul(rotation, vect, out = vect)
+# def rotate_horizontal(angle,x,y,overwrite=True):
+#     vect = np.asarray([x,y])
+#     np.matmul(rotation, vect, out = vect)
 
 class GroundMotionRecord(dict):
     """
@@ -43,11 +43,13 @@ class GroundMotionRecord(dict):
             x = getattr(self["long"], attr)
             y = getattr(self["tran"], attr)
             X = np.array([x,y])
-            #x, y = rotate_horizontal(horizontal_angle, x, y)
             x[:] = np.dot(rx, X)
             y[:] = np.dot(ry, X)
-            #setattr(self["long"], attr, x)
-            #setattr(self["tran"], attr, y)
+
+            x, y = map(lambda d: self[d][f"peak_{attr}"], ["long", "tran"])
+            X = np.array([x,y])
+            self["long"]["peak_{attr}"] = np.dot(rx, X)
+            self["tran"]["peak_{attr}"] = np.dot(ry, X)
         return self
 
 
