@@ -55,6 +55,18 @@ HEADER_FIELDS = {
             rf"Instr Period = ({RE_DECIMAL}) ({RE_UNITS}),"
         )
     ),
+    # line 15
+    (
+        "record.filter.bandpass.point", ".units", 
+        "record.filter.bandpass.limit_low",
+        "record.filter.bandpass.limit_high",
+        "record.filter.bandpass.limit.units"
+    ) : (
+        (float, str, float, float, str),
+        re.compile(
+            rf"Accelerogram bandpass filtered with *({RE_DECIMAL}) *({RE_UNITS}) pts at *({RE_DECIMAL}) and *({RE_DECIMAL}) *({RE_UNITS})\s"
+        )
+    ),
     ("record.peak_accel", ".units", ".time"): ((float, str, float),
         re.compile(
             rf"Peak *acceleration *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})"
@@ -72,7 +84,7 @@ HEADER_FIELDS = {
     ),
     ("record.init_veloc", ".units", "record.init_displ", ".units"): ((float, str, float, str),
         re.compile(
-            rf"Initial velocity *= *({RE_DECIMAL}) *({RE_UNITS}); *Initial displacement *= *({RE_DECIMAL}) *({RE_UNITS})"
+            rf"Initial velocity *= *({RE_DECIMAL}) *({RE_UNITS}); *Initial displacement *= *({RE_DECIMAL}) *({RE_UNITS})\s"
         )
     ),
     ("accel.shape", "accel.time_step"): ((int, float),

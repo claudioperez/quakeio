@@ -6,9 +6,9 @@ from typing import Union, IO, Callable
 import contextlib
 
 # Regular expression for extracting decimal number
-RE_DECIMAL = "[-]?[0-9]*[.][0-9]*"
+RE_DECIMAL = "[-]?[0-9]*[.]?[0-9]*"
 # Regular expression for extracting units
-RE_UNITS = "[a-z,/,*,0-9]*"
+RE_UNITS = "[A-z,/,0-9]*"
 
 CRE_WHITE = re.compile("\\W+")
 

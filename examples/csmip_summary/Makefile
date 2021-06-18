@@ -1,0 +1,17 @@
+
+summary_A.txt: FORCE
+	quakeio -S -t yaml 58658_007_20210426_10.09.54.P.zip \
+		| grep -v '\[\]' \
+		| grep -v file \
+		| grep -v "''" \
+		| grep -v '\.units' 
+
+summary_B.txt: FORCE
+	python csmip.py
+
+summary_B.pdf: FORCE
+	python csmip.py | pandoc -o summary_B.pdf
+
+FORCE:
+
+

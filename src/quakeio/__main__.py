@@ -1,24 +1,44 @@
 # Claudio Perez
 # Command line interface for QuakeIO tool
 import argparse
-import quakeio
 
+import quakeio
 
 def build_parser():
     # fmt: off
     parser = argparse.ArgumentParser(
-        prog="quakeio", description="Ground motion processing utilities.",
+        prog="quakeio", 
+        description="""Parsers and utilities for processing and converting accelerograms.
+
+        """,
         usage="quakeio [MODE] [OPTIONS] FILE"
     )
-    parser.add_argument("read_file", nargs="?", default="-")
-    parser.add_argument("-o", dest="write_file", default="-")
-    parser.add_argument("-c", dest="command", action="append")
-    parser.add_argument("-S", "--summarize", action="store_true",
+    modes = parser.add_argument_group("Modes")
+    modes.add_argument("-A", "--all", dest="mode_process", action="store_true",
+        help="Process all input data [default]"
+    )
+    modes.add_argument("-S", "--summarize", action="store_true",
         help="Omit time series data and superfluous fields from output"
     )
+
+    parser.add_argument("read_file", metavar="FILE", nargs="?", default="-")
+    parser.add_argument(
+            "-o", 
+            dest="write_file", 
+            default="-",
+            help="Specify an output file."
+    )
+    parser.add_argument(
+            "--human",
+            default=False,
+            action="store_true",
+            help="Use human friendly field names."
+    )
+    #parser.add_argument("-c", dest="command", action="append")
     parser.add_argument(
         "-f",
         dest="input_format",
+        metavar="FORMAT",
         help="Specity input file format",
         choices=list(quakeio.FILE_TYPES.keys()),
     )
@@ -26,23 +46,29 @@ def build_parser():
         "-t",
         "--to",
         dest="write_format",
+        metavar="FORMAT",
         help="Specity output file format",
         default="json",
     )
-    parser.add_argument("-s", "--scale", help="Scale ground motions by factor FACTOR")
+    # parser.add_argument("-s", "--scale", help="Scale ground motions by factor FACTOR")
 
     parser.add_argument(
         "--version", help="Print version and exit.", action="version", version=quakeio.__version__
+    )
+    formats = parser.add_argument_group("Formats",
+        description=f"""
+        yaml, json, csmip
+        """
+        # {', '.join(quakeio.FILE_TYPES.keys())}
     )
     # fmt: on
     return parser
 
 
-def cli(*args, write_file="-", version=False, command=None, **kwds):
-    #if version:
-    #    print(quakeio.__version__)
-    #    return
+def cli(*args, write_file="-", human=False, version=False, command=None, **kwds):
     motion = quakeio.read(**kwds)
+    if human:
+        motion = quakeio.core.write_pretty(motion)
     quakeio.write(write_file, motion, **kwds)
     print("\n")
 

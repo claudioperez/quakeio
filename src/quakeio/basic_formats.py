@@ -37,7 +37,6 @@ def read_yaml(read_file, **k):
 def write_yaml(write_file, ground_motion, summarize=True, **kwds):
     import yaml
 
-    ground_motion = write_pretty(ground_motion)
     ground_motion = ground_motion.serialize(serialize_data=not summarize)
     # if not summarize:
     #     ground_motion = ground_motion.serialize()
@@ -46,28 +45,6 @@ def write_yaml(write_file, ground_motion, summarize=True, **kwds):
         yaml.dump(ground_motion, f)
 
 
-def write_pretty(data):
-    output = copy(data)
-    schema_dir = Path(__file__).parents[2] / "etc/schemas"
-    schema_file = schema_dir / "record.schema.json"
-    with open(schema_file, "r") as f:
-        schema = json.load(f)["properties"]
-    if isinstance(data, GroundMotionComponent):
-        for k in data:
-            if k in schema and "units" not in k:
-                output[schema[k]["title"]] = output.pop(k)
-    elif isinstance(data, GroundMotionEvent):
-        for name, record in data.items():
-            output[name] = copy(record)
-            for dirn, component in record.items():
-                output[name][dirn] = copy(component)
-                for k, v in component.items():
-                    if k in schema and "units" not in k:
-                        output[name][dirn][schema[k]["title"]] = output[name][dirn].pop(
-                            k
-                        )
-
-    return output
 
 
 FILE_TYPES = {
