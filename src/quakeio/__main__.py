@@ -44,11 +44,17 @@ def build_parser():
     )
     parser.add_argument(
         "-t",
-        "--to",
         dest="write_format",
         metavar="FORMAT",
         help="Specity output file format",
         default="json",
+    )
+    parser.add_argument(
+        "-r",
+        "--rotate",
+        dest="angle",
+        metavar="ANGLE",
+        help="Rotate grouped records by ANGLE"
     )
     # parser.add_argument("-s", "--scale", help="Scale ground motions by factor FACTOR")
 
@@ -69,6 +75,8 @@ def cli(*args, write_file="-", human=False, version=False, command=None, **kwds)
     motion = quakeio.read(**kwds)
     if human:
         motion = quakeio.core.write_pretty(motion)
+    if "angle" in kwds:
+        quakeio.core.rotate(motion, float(kwds["angle"]))
     quakeio.write(write_file, motion, **kwds)
     print("\n")
 

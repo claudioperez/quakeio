@@ -3,6 +3,7 @@
 import json
 from copy import copy
 from pathlib import Path
+import warnings
 
 import numpy as np
 
@@ -99,6 +100,19 @@ class GroundMotionSeries(np.ndarray):
             fig, ax = plt.subplots()
         ax.plot(self)
 
+def rotate(data, angle):
+    output = copy(data)
+    if isinstance(data, GroundMotionComponent):
+        raise Exception("Unable to rotate single component")
+
+    elif isinstance(data, GroundMotionEvent):
+        for name, record in data.items():
+            try:
+                record.rotate(angle)
+            except KeyError:
+                warnings.warn(f"Not rotating record {name}")
+
+
 def write_pretty(data):
     output = copy(data)
     schema_dir = Path(__file__).parents[2] / "etc/schemas"
@@ -110,7 +124,8 @@ def write_pretty(data):
             if k in schema and "units" not in k:
                 output[schema[k]["title"]] = output.pop(k)
             else:
-                del output[k]
+                pass
+                #del output[k]
 
     elif isinstance(data, GroundMotionEvent):
         for name, record in data.items():
@@ -121,6 +136,7 @@ def write_pretty(data):
                     if k in schema and "units" not in k:
                         output[name][dirn][schema[k]["title"]] = output[name][dirn].pop(k)
                     else:
-                        del output[name][dirn][k]
+                        pass
+                        #del output[name][dirn][k]
 
     return output
