@@ -1,0 +1,203 @@
+
+# Summary for event file `58658_007_20210426_10.09.54.P.zip`
+
+Deck Level near Abut 1:
+  Up (Chan 11):
+    Peak acceleration..................: -0.0360
+    Time of peak acceleration..........: 20.6250
+    Peak velocity......................: 0.6000
+    Time of peak velocity..............: 20.6100
+    Peak displacement..................: -0.9580
+    Time of peak displacement..........: 10.1200
+    Initial velocity...................: -0.0650
+    Initial displacement...............: -0.5940
+  Long (Chan 12):
+    Peak acceleration..................: -0.0118
+    Time of peak acceleration..........: 20.4800
+    Peak velocity......................: 0.2000
+    Time of peak velocity..............: 20.4600
+    Peak displacement..................: -0.5350
+    Time of peak displacement..........: 9.0500
+    Initial velocity...................: -0.0380
+    Initial displacement...............: -0.3480
+  Tran (Chan 13):
+    Peak acceleration..................: -0.0147
+    Time of peak acceleration..........: 20.4850
+    Peak velocity......................: 0.1890
+    Time of peak velocity..............: 20.4750
+    Peak displacement..................: 0.6750
+    Time of peak displacement..........: 54.7350
+    Initial velocity...................: -0.0490
+    Initial displacement...............: -0.3750
+
+Bent 3 Deck Level:
+  Long (Chan 14):
+    Peak acceleration..................: -0.0048
+    Time of peak acceleration..........: 25.0300
+    Peak velocity......................: 0.1120
+    Time of peak velocity..............: 23.2250
+    Peak displacement..................: 0.1220
+    Time of peak displacement..........: 24.1900
+    Initial velocity...................: 0.0010
+    Initial displacement...............: 0.0170
+  Tran (Chan 15):
+    Peak acceleration..................: -0.0026
+    Time of peak acceleration..........: 27.1050
+    Peak velocity......................: 0.1750
+    Time of peak velocity..............: 31.3950
+    Peak displacement..................: 1.3580
+    Time of peak displacement..........: 54.3450
+    Initial velocity...................: -0.0920
+    Initial displacement...............: -0.7320
+
+Midspan between Bents 3 4 Deck:
+  Up (Chan 16):
+    Peak acceleration..................: 0.0576
+    Time of peak acceleration..........: 25.0500
+    Peak velocity......................: 1.4540
+    Time of peak velocity..............: 25.0700
+    Peak displacement..................: 0.5640
+    Time of peak displacement..........: 26.7550
+    Initial velocity...................: 0.0500
+    Initial displacement...............: -0.0570
+
+Bent 4 North Column Top:
+  Long (Chan 19):
+    Peak acceleration..................: -0.0037
+    Time of peak acceleration..........: 31.2200
+    Peak velocity......................: 0.2760
+    Time of peak velocity..............: 32.8400
+    Peak displacement..................: 1.5800
+    Time of peak displacement..........: 44.8750
+    Initial velocity...................: -0.0690
+    Initial displacement...............: -1.0990
+  Tran (Chan 20):
+    Peak acceleration..................: -0.0048
+    Time of peak acceleration..........: 25.1150
+    Peak velocity......................: 0.1220
+    Time of peak velocity..............: 23.9000
+    Peak displacement..................: 0.3410
+    Time of peak displacement..........: 26.3600
+    Initial velocity...................: -0.0060
+    Initial displacement...............: -0.1320
+
+Bent 4 Deck Level:
+  Up (Chan 21):
+    Peak acceleration..................: 0.0074
+    Time of peak acceleration..........: 24.5350
+    Peak velocity......................: 0.1630
+    Time of peak velocity..............: 25.0000
+    Peak displacement..................: -1.1040
+    Time of peak displacement..........: 10.4550
+    Initial velocity...................: -0.0740
+    Initial displacement...............: -0.6760
+  Long (Chan 22):
+    Peak acceleration..................: 0.0272
+    Time of peak acceleration..........: 28.6800
+    Peak velocity......................: -5.2310
+    Time of peak velocity..............: 44.5050
+    Peak displacement..................: 30.5490
+    Time of peak displacement..........: 33.5750
+    Initial velocity...................: 0.4150
+    Initial displacement...............: -11.0300
+  Tran (Chan 23):
+    Peak acceleration..................: 0.0034
+    Time of peak acceleration..........: 24.5450
+    Peak velocity......................: -0.1620
+    Time of peak velocity..............: 24.0500
+    Peak displacement..................: 0.4700
+    Time of peak displacement..........: 5.0850
+    Initial velocity...................: 0.0330
+    Initial displacement...............: 0.3670
+
+Abutment 1:
+  Up (Chan 1):
+    Peak acceleration..................: 0.0178
+    Time of peak acceleration..........: 20.2700
+    Peak velocity......................: 0.2050
+    Time of peak velocity..............: 20.2900
+    Peak displacement..................: -0.0040
+    Time of peak displacement..........: 20.2700
+    Initial velocity...................: 0.0000
+    Initial displacement...............: 0.0000
+  Long (Chan 2):
+    Peak acceleration..................: 0.0047
+    Time of peak acceleration..........: 19.7750
+    Peak velocity......................: 0.0490
+    Time of peak velocity..............: 19.7850
+    Peak displacement..................: 0.1900
+    Time of peak displacement..........: 54.1700
+    Initial velocity...................: -0.0130
+    Initial displacement...............: -0.1100
+  Tran (Chan 3):
+    Peak acceleration..................: -0.0027
+    Time of peak acceleration..........: 20.2850
+    Peak velocity......................: -0.0340
+    Time of peak velocity..............: 20.3000
+    Peak displacement..................: 0.2820
+    Time of peak displacement..........: 58.7950
+    Initial velocity...................: -0.0170
+    Initial displacement...............: -0.0630
+
+Bent 3 South Column Grnd Level:
+  Long (Chan 6):
+    Peak acceleration..................: -0.0039
+    Time of peak acceleration..........: 25.0300
+    Peak velocity......................: -0.0700
+    Time of peak velocity..............: 24.0950
+    Peak displacement..................: 0.3360
+    Time of peak displacement..........: 9.5150
+    Initial velocity...................: 0.0220
+    Initial displacement...............: 0.2140
+  Tran (Chan 7):
+    Peak acceleration..................: 0.0090
+    Time of peak acceleration..........: 24.1650
+    Peak velocity......................: -0.1460
+    Time of peak velocity..............: 24.1450
+    Peak displacement..................: 0.2180
+    Time of peak displacement..........: 22.4100
+    Initial velocity...................: 0.0080
+    Initial displacement...............: 0.0450
+
+Bent 4 North Column Grnd Level:
+  Long (Chan 17):
+    Peak acceleration..................: 0.0030
+    Time of peak acceleration..........: 28.5000
+    Peak velocity......................: 0.0600
+    Time of peak velocity..............: 28.5150
+    Peak displacement..................: -0.3470
+    Time of peak displacement..........: 11.9500
+    Initial velocity...................: -0.0240
+    Initial displacement...............: -0.1700
+  Tran (Chan 18):
+    Peak acceleration..................: 0.0035
+    Time of peak acceleration..........: 25.1500
+    Peak velocity......................: 0.0420
+    Time of peak velocity..............: 25.1000
+    Peak displacement..................: 0.0910
+    Time of peak displacement..........: 26.3600
+    Initial velocity...................: -0.0040
+    Initial displacement...............: -0.0450
+
+Bent 4 South Column Grnd Level:
+  Long (Chan 24):
+    Peak acceleration..................: 0.0146
+    Time of peak acceleration..........: 26.5700
+    Peak velocity......................: 0.2260
+    Time of peak velocity..............: 27.3600
+    Peak displacement..................: 0.1480
+    Time of peak displacement..........: 56.4650
+    Initial velocity...................: -0.0080
+    Initial displacement...............: -0.0330
+  Tran (Chan 25):
+    Peak acceleration..................: 0.0071
+    Time of peak acceleration..........: 24.9700
+    Peak velocity......................: -0.1250
+    Time of peak velocity..............: 27.4850
+    Peak displacement..................: 0.1510
+    Time of peak displacement..........: 25.3950
+    Initial velocity...................: -0.0090
+    Initial displacement...............: -0.0770
+
+
+

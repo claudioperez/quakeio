@@ -66,7 +66,7 @@ def consolidate_records(data):
     station_data = {
         align("Station Number"): station_no,
         align("Station Coordinates"): station_coord,
-        align("Filter point"): filter_point,
+        #align("Filter bandwidth"): filter_point,
         align("Filter low cut"): filter_low,
         align("Filter high cut"): filter_high,
         align("Record time step, dt"): time_step
