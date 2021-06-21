@@ -78,24 +78,23 @@
             "$id": "#/properties/peak_accel",
             "type": "number",
             "title": "Peak acceleration",
-            "examples": [
-                17.433
-            ]
+            "examples": [17.433]
         },
         "peak_accel.units": {
             "$id": "#/properties/peak_accel.units",
             "type": "string",
             "title": "Peak acceleration units",
             "default": "",
-            "examples": [
-                "cm/sec/sec"
-            ]
+            "examples": ["cm/sec/sec"]
         },
+	"accel.time_step": {
+	    "type": "number",
+	    "title": "Time step of acceleration data"
+	},
         "peak_accel.time": {
             "$id": "#/properties/peak_accel.time",
             "type": "number",
             "title": "Time of peak acceleration",
-            "default": 0.0,
             "examples": [
                 20.27
             ]
