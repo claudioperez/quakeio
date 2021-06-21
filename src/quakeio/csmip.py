@@ -37,7 +37,7 @@ words = lambda x: CRE_WHITE.sub(" ", str(x)).strip()
 # fmt: off
 HEADER_FIELDS = {
     # line 6
-    ("record.station_no", "record.azimuth"): ((str, str),
+    ("record.station.no", "record.station.coord"): ((str, str),
         re.compile(
             rf"Station No\. *([0-9]*) *({RE_DECIMAL}[NSEW]*, *{RE_DECIMAL}[NSEW]*)"
         )
