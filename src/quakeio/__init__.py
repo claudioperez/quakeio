@@ -1,5 +1,5 @@
 # Claudio Perez
-__version__ = "0.0.2"
+__version__ = "0.0.5"
 
 from pathlib import Path
 
@@ -18,10 +18,10 @@ FILE_TYPES.update(eqsig.FILE_TYPES)
 FILE_TYPES.update(basic_formats.FILE_TYPES)
 
 DEFAULT_TYPES = {
-    ".at2":  "nga.at2",
-    ".AT2":  "nga.at2",
-    ".zip":  "csmip.zip",
-    ".v2":   "csmip.v2",
+    ".at2": "nga.at2",
+    ".AT2": "nga.at2",
+    ".zip": "csmip.zip",
+    ".v2": "csmip.v2",
     ".json": "json",
 }
 

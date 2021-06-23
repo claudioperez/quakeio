@@ -6,17 +6,22 @@ from typing import Union, IO, Callable
 import contextlib
 
 # Regular expression for extracting decimal number
-RE_DECIMAL = "[-]?[0-9]*[.][0-9]*"
+RE_DECIMAL = "[-]?[0-9]*[.]?[0-9]*"
 # Regular expression for extracting units
-RE_UNITS = "[a-z,/,*,0-9]*"
+RE_UNITS = "[A-z,/,0-9]*"
 
-def maybe_t(pattern:str, typ: Callable, strict: bool = True):
+CRE_WHITE = re.compile("\\W+")
+
+
+def maybe_t(pattern: str, typ: Callable, strict: bool = True):
     def proc(match):
         if match:
             return typ(re.search(pattern, match).group(1))
         else:
             return None
+
     return proc
+
 
 @contextlib.contextmanager
 def open_quake(file, mode=None, archive=None):

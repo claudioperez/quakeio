@@ -8,9 +8,13 @@
 
 QuakeIO is a library of utilities for parsing ground motion files. Interfaces are provided for Python, Matlab, and the command line.
 
+- [Formats](#formats)
+- [Python API](#Python-API)
+
+
 ## Formats
 
-| Format          | Read      | Write   |  Reference      |
+| Format          | Read      | Write   |  Reference              |
 |-----------------|-----------|---------|-------------------------|
 |`[quakeio.]json` | &#9745;   | &#9745; | [schema][record-schema] |
 |`csmip`          | &#9744;   | &#9744; |                         |
@@ -23,31 +27,8 @@ QuakeIO is a library of utilities for parsing ground motion files. Interfaces ar
 |`mdof`           | &#9744;   | &#9744; |                         |
 | SimCenter.Event | &#9744;   | &#9744; |                         |
 
-## Examples
 
-### Command line
-
-```bash
-$ quakeio -a rot:30 chan001.v2 -t html
-```
-
-Rotate and calculate Husid series.
-```bash
-$ quakeio -c 'rot:30;husid;' chan001.v2 
-```
-
-```bash
-$ cat chan001.v2 | quakeio -a rot:30 -f csmip.v2 -t html | pandoc -f html -t pdf
-```
-
-```bash
-$ cat chan001.v2 \
-    | quakeio -a rot:30 -f csmip.v2 -t html -x [*].data \
-    | pandoc -f html -t pdf
-```
-
-
-### Library
+## Python API
 
 ```python
 import quakeio
@@ -74,23 +55,34 @@ Options:
  
 -f/--from FORMAT
 -t/--to   FORMAT
-
--x/--exclude FIELD
-
--m/--metadata=KEY[:VALUE]
-
-Commands:
-  husid;
-  scale:SCALE;
-  rotate:cs=ANGLE;
-  filter:<freq>;
-  spect;
-
-Formats:
-  html
-  csmip[.v1,.v2,.v3]
-  nga
 ```
+
+```bash
+$ quakeio -a rot:30 chan001.v2 -t html
+```
+
+Rotate and calculate Husid series.
+```bash
+$ quakeio -c 'rot:30;husid;' chan001.v2 
+```
+
+```bash
+$ cat chan001.v2 | quakeio -a rot:30 -f csmip.v2 -t html | pandoc -f html -t pdf
+```
+
+```bash
+$ cat chan001.v2 \
+    | quakeio -a rot:30 -f csmip.v2 -t html -x [*].data \
+    | pandoc -f html -t pdf
+```
+
+## MATLAB Interface
+
+```matlab
+Motion = quakeIO.read('csmip.zip')
+```
+
+
 
 <!-- Reference links -->
 [EQSIG]: https://github.com/eng-tools/eqsig
@@ -105,6 +97,7 @@ Formats:
 [pypi-v-link]: https://pypi.org/project/quakeio
 [build-img]: https://github.com/claudioperez/quakeio/actions/workflows/base.yml/badge.svg
 [cov-img]: https://raw.githubusercontent.com/claudioperez/quakeio/master/etc/coverage/cov.svg
-[gh-link]: https://github.com/claudioperez/quakeio/compare/0.0.2...master
-[gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/0.0.2?style=social
+[gh-link]: https://github.com/claudioperez/quakeio/compare/0.0.3...master
+[gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/0.0.3?style=social
+
 

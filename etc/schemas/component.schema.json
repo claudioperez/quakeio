@@ -1,6 +1,5 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "http://example.com/example.json",
     "type": "object",
     "title": "quakeIO Ground Motion Record schema",
     "description": "quakeIO Ground Motion Record schema.",
@@ -28,8 +27,6 @@
     ],
     "required": [
         "azimuth",
-        "instr_period",
-        "instr_period.units",
         "peak_accel",
         "peak_accel.units",
         "peak_accel.time",
@@ -41,66 +38,63 @@
         "peak_displ.time"
     ],
     "properties": {
+        "location": {
+            "$id": "#/properties/location",
+            "type": "string",
+            "title": "Location",
+            "description": "Number identifying station at which the data was recorded."
+        },
+        "filter.bandpass.limit_high": {
+            "$id": "#/properties/filter.bandpass.limit_high",
+            "type": "number",
+            "title": "Band-pass filter high cutoff.",
+            "description": "Upper cutoff point for band-pass filter."
+        },
         "station_no": {
             "$id": "#/properties/station_no",
             "type": "string",
             "title": "Station number",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "58658"
-            ]
+            "description": "Number identifying station at which the data was recorded."
         },
         "azimuth": {
             "$id": "#/properties/azimuth",
             "type": "string",
             "title": "Azimuth",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
             "examples": ["37.691N, 122.099W"]
         },
         "instr_period": {
             "$id": "#/properties/instr_period",
             "type": "number",
             "title": "Instrument period",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "examples": [
-                0.0047
-            ]
+            "examples": [0.0047]
         },
         "instr_period.units": {
             "$id": "#/properties/instr_period.units",
             "type": "string",
             "title": "Instrument period units",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "sec"
-            ]
+            "examples": ["sec"]
         },
         "peak_accel": {
             "$id": "#/properties/peak_accel",
             "type": "number",
             "title": "Peak acceleration",
-            "examples": [
-                17.433
-            ]
+            "examples": [17.433]
         },
         "peak_accel.units": {
             "$id": "#/properties/peak_accel.units",
             "type": "string",
             "title": "Peak acceleration units",
             "default": "",
-            "examples": [
-                "cm/sec/sec"
-            ]
+            "examples": ["cm/sec/sec"]
         },
+	"accel.time_step": {
+	    "type": "number",
+	    "title": "Time step of acceleration data"
+	},
         "peak_accel.time": {
             "$id": "#/properties/peak_accel.time",
             "type": "number",
             "title": "Time of peak acceleration",
-            "default": 0.0,
             "examples": [
                 20.27
             ]
@@ -137,17 +131,13 @@
             "$id": "#/properties/peak_displ.units",
             "type": "string",
             "title": "peak_displ.units",
-            "examples": [
-                "cm"
-            ]
+            "examples": ["cm"]
         },
         "peak_displ.time": {
             "$id": "#/properties/peak_displ.time",
             "type": "number",
             "title": "Time of peak displacement",
-            "examples": [
-                20.27
-            ]
+            "examples": [20.27]
         },
         "init_displ": {
             "$id": "#/properties/init_displ",

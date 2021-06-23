@@ -5,11 +5,20 @@ import quakeio
 csmip_archive = Path("dat/58658_007_20210426_10.09.54.P.zip")
 csmip_dir = Path("dat/58658_007_20210426_10.09.54.P/")
 
+#----------------------------------------------------------------------
+# Record (.v2)
+#----------------------------------------------------------------------
+def test_read_event():
+    return quakeio.csmip.read_event(csmip_archive)
 
-def test_1():
-    csmip_event = quakeio.csmip.read_event(csmip_archive)
+def test_unique():
+    event = test_read_event()
+    all_records = [r for g in event.values() for r in g.values()]
+    assert len(all_records) == 20
 
-
+#----------------------------------------------------------------------
+# Record (.v2)
+#----------------------------------------------------------------------
 def test_2():
     csmip_record = quakeio.csmip.read_record(csmip_dir / "chan001.v2")
     quakeio.write("-", csmip_record, "json")
@@ -46,7 +55,7 @@ def test_veloc_data():
 
 
 
-# csmip_record = quakeio.GroundMotionRecord(csmip_dir/"chan001.v2")
+# csmip_record = quakeio.GroundMotionComponent(csmip_dir/"chan001.v2")
 
 # csmip_record.peak_accel
 
