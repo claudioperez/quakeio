@@ -43,6 +43,7 @@ def open_quake(file, mode=None, archive=None):
     #     fh.close()
     try:
         yield fh
+
     finally:
         if isinstance(file, str) and file != "-":
             fh.close()

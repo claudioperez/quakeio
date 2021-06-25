@@ -77,6 +77,7 @@ def cli(*args, write_file="-", human=False, version=False, command=None, **kwds)
         motion = quakeio.core.write_pretty(motion)
     if "angle" in kwds and kwds["angle"]:
         quakeio.core.rotate(motion, float(kwds["angle"]))
+
     quakeio.write(write_file, motion, **kwds)
     print("\n")
 

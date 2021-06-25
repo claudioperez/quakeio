@@ -22,10 +22,13 @@ def read_json(read_file, **kwds: Unused):
     return json.load(read_file)
 
 
-def write_json(write_file, ground_motion, indent=4, summarize=True, **kwds):
+def write_json(write_file, ground_motion, indent=4, summarize=False, **kwds):
     ground_motion = ground_motion.serialize(serialize_data=not summarize)
-    with open_quake(write_file, "w") as f:
-        json.dump(ground_motion, f, indent=indent, cls=QuakeEncoder)
+    try:
+        with open_quake(write_file, "w") as f:
+            json.dump(ground_motion, f, indent=indent, cls=QuakeEncoder)
+    except BrokenPipeError:
+        pass
 
 
 def read_yaml(read_file, **k):
@@ -34,7 +37,7 @@ def read_yaml(read_file, **k):
     return yaml.load(read_file, Loader=yaml.Loader)
 
 
-def write_yaml(write_file, ground_motion, summarize=True, **kwds):
+def write_yaml(write_file, ground_motion, summarize=False, **kwds):
     import yaml
 
     ground_motion = ground_motion.serialize(serialize_data=not summarize)

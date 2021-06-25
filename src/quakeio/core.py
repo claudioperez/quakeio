@@ -7,6 +7,7 @@ import warnings
 
 import numpy as np
 
+DIRECTIONS = ["long", "tran", "up"]
 
 class GroundMotionEvent(dict):
     """
@@ -19,6 +20,12 @@ class GroundMotionEvent(dict):
     def serialize(self, serialize_data=True, **kwds) -> dict:
         return {k: v.serialize(**kwds) for k, v in self.items()}
 
+    def get(self, **kwds):
+        for record in self.values():
+            for component in record.values():
+                if all([component[k] == v for k,v in kwds.items()]):
+                    return component
+
 
 class GroundMotionRecord(dict):
     """
@@ -28,6 +35,7 @@ class GroundMotionRecord(dict):
         dict.__init__(self, **records)
 
     def serialize(self, serialize_data=True, **kwds) -> dict:
+        print(kwds)
         return {k: v.serialize(**kwds) for k, v in self.items()}
 
     def rotate(self, angle=None, rotation=None):
@@ -45,9 +53,26 @@ class GroundMotionRecord(dict):
 
             x, y = map(lambda d: self[d][f"peak_{attr}"], ["long", "tran"])
             X = np.array([x,y])
-            self["long"]["peak_{attr}"] = np.dot(rx, X)
-            self["tran"]["peak_{attr}"] = np.dot(ry, X)
+            self["long"][f"peak_{attr}"] = float(np.dot(rx, X))
+            self["tran"][f"peak_{attr}"] = float(np.dot(ry, X))
         return self
+    
+    def norm(self):
+        accel = GroundMotionSeries(
+            sum(self[dirn].accel**2 
+                for dirn in ["long", "tran", "up"] 
+                   if dirn in self and self[dirn]
+            )
+        )
+        return GroundMotionComponent(accel, accel, accel)
+
+    def __sub__(self,other):
+        ret = copy(self)
+        for dirn in DIRECTIONS:
+            ret[dirn] = self[dirn] - other[dirn] if dirn in other and dirn in self else None
+        return ret
+        
+
 
 
 class GroundMotionComponent(dict):
@@ -81,6 +106,44 @@ class GroundMotionComponent(dict):
                 }
             )
         return ret
+
+
+    def __sub__(self,other):
+        ret = copy(self)
+        if isinstance(other, GroundMotionComponent):
+            for k in ["accel", "veloc", "displ"]:
+                setattr(ret,k,getattr(other,k) - getattr(self,k))
+
+        elif isinstance(other, (float, int)):
+            for k in ["accel", "veloc", "displ"]:
+                setattr(ret, k, other - getattr(self,k))
+        return ret
+
+    
+    def __add__(self,other):
+        ret = copy(self)
+        if isinstance(other, GroundMotionComponent):
+            for k in ["accel", "veloc", "displ"]:
+                setattr(ret,k,getattr(other,k) + getattr(self,k))
+
+        elif isinstance(other, (float, int)):
+            for k in ["accel", "veloc", "displ"]:
+                setattr(ret, k, other + getattr(self,k))
+        return ret
+
+    def __mul__(self,other):
+        ret = copy(self)
+        if isinstance(other, GroundMotionComponent):
+            for k in ["accel", "veloc", "displ"]:
+                setattr(ret,k,getattr(other,k) * getattr(self,k))
+        elif isinstance(other, (float, int)):
+            for k in ["accel", "veloc", "displ"]:
+                setattr(ret, k, other * getattr(self,k))
+
+        return ret
+    
+    def __rmul__(self,other):
+        return self.__mul__(other)
 
 
 class GroundMotionSeries(np.ndarray):
