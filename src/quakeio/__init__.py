@@ -8,6 +8,7 @@ from . import (
     nga,
     eqsig,
     basic_formats,
+    opensees
 )
 
 
@@ -16,6 +17,7 @@ FILE_TYPES.update(nga.FILE_TYPES)
 FILE_TYPES.update(csmip.FILE_TYPES)
 FILE_TYPES.update(eqsig.FILE_TYPES)
 FILE_TYPES.update(basic_formats.FILE_TYPES)
+FILE_TYPES.update(opensees.FILE_TYPES)
 
 DEFAULT_TYPES = {
     ".at2": "nga.at2",
@@ -49,3 +51,5 @@ def write(write_file, ground_motion, write_format=None, *args, **kwds):
         except KeyError:
             raise ValueError("Unable to deduce output format")
     FILE_TYPES[typ]["write"](write_file, ground_motion, *args, **kwds)
+
+
