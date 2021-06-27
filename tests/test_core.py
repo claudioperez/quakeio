@@ -17,7 +17,7 @@ def test_rotate():
     event = test_read_event()
     assert type(event) == quakeio.core.GroundMotionEvent
 
-    rec = event["abutment_1"]
+    rec = event["bent_4_north_column_grnd_level"]
     assert type(rec) == quakeio.core.GroundMotionRecord
 
 
