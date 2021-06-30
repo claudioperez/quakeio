@@ -20,7 +20,7 @@ class GroundMotionEvent(dict):
     def serialize(self, serialize_data=True, **kwds) -> dict:
         return {k: v.serialize(**kwds) for k, v in self.items()}
 
-    def get(self, **kwds):
+    def get_component(self, **kwds):
         for record in self.values():
             for component in record.values():
                 if all([component[k] == v for k,v in kwds.items()]):

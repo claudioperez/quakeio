@@ -2,6 +2,12 @@ import numpy as np
 
 import quakeio
 
+def test_mul():
+    from .test_csmip import test_read_event
+    event = test_read_event()
+
+
+    pass
 
 def test_rotate():
     # pick an arbitrary time
