@@ -8,6 +8,7 @@
 
 QuakeIO is a library of utilities for parsing ground motion files. Interfaces are provided for Python, Matlab, and the command line.
 
+- [Install](#install)
 - [Formats](#formats)
 - [Python API](#Python-API)
 
