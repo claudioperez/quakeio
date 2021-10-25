@@ -1,15 +1,63 @@
 # Claudio Perez
+"""
+This script generates a text summary of a given CSMIP zip file.
+
+The variables `ground_channels` and `bridge_channels` must be changed
+in order to use this script with different bridges.
+
+Installation
+============
+This script depends on external libraries which may be installed by
+running the following commands from any standard command line shell
+(e.g. Bash on Linux, Powershell on Windows)
+
+>> python -m pip install --upgrade pip
+
+>> python -m pip install --upgrade quakeio
+
+
+Using the Script
+================
+This script can be invoked from any modern command line shell as 
+follows:
+
+>> python Path_to_this_file Path_to_data.zip > Summary.txt
+
+
+For example, if the contents of the current working directory
+is the following:
+.
+├── 58658_003_20210628_18.29.26.P.zip
+└── summarize.py
+
+
+Then the script would be invoked as follows to create a summary
+named `Summary.txt` in the same directory.
+
+>> python summarize.py 58658_003_20210628_18.29.26.P.zip > Summary.txt
+
+"""
+
+# standard library imports; these are installed by default
 import re
 import sys
+from pathlib import Path
 from functools import cmp_to_key
 from collections import defaultdict
 
+# depencencies
 import yaml
 import numpy as np
 
 import quakeio
 
+ground_channels = [1, 2, 3, 6, 7, 17, 18, 24, 25]
+bridge_channels = [11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23]
+
+
 class YamlDumper(yaml.SafeDumper):
+    # This class handles formatting of some datatypes
+    # when generating YAML output
     def write_line_break(self,data=None):
         super().write_line_break(data)
         if len(self.indents) == 1:
@@ -19,13 +67,16 @@ class YamlDumper(yaml.SafeDumper):
         pass
 
 def float_representer(dumper, value):
+    # This function causes floating point numbers to be 
+    # printed with a uniform width in YAML output
     return dumper.represent_scalar("tag:yaml.org,2002:float", f"{value:10.4f}")
 
 YamlDumper.add_representer(float, float_representer)
 
+# Some simple utility functions
 dump_yaml = lambda x: yaml.dump(x, Dumper=YamlDumper,sort_keys=False)
-
 align = lambda strng: strng.ljust(30,".")
+
 
 def consolidate_records(data):
     g = 9.80665 # m/s^2
@@ -83,7 +134,6 @@ def update_peaks(peaks, record):
         peaks[attr] = max(record[attr], peaks[attr], key=abs)
 
 def extract_peaks(data, bridge_channels, ground_channels):
-
     # create a data structure whose default field is another data
     # structure whose default field is zero
     bridge_records = defaultdict(lambda: defaultdict(lambda: 0.0))
@@ -99,10 +149,10 @@ def extract_peaks(data, bridge_channels, ground_channels):
 
     return bridge_records, ground_records
 
-def summary_B(file_name, station, brdg, grnd, records):
+def summarize(file_name, station, brdg, grnd, records):
     g = 9.80665 # m/s^2
     return f"""
-# Summary for event file `{file_name}`
+# Summary for event file `{Path(file_name).name}`
 
 ```yml
 {yaml.dump(station, sort_keys=False)}
@@ -146,18 +196,18 @@ Vertical         {1/(g*100)*grnd["up"]["peak_accel"]:14.4f} {grnd["up"]["peak_ve
 """
 
 if __name__ == "__main__":
-    # These are the procedures that are run 
-    # when this file is invoked as a script
-    if len(sys.argv) > 2:
+    # These are the procedures that are run when this file 
+    # is invoked as a script from the command line.
+    if len(sys.argv) == 2:
         file_name = sys.argv[-1]
     else:
-        file_name = "58658_007_20210426_10.09.54.P.zip"
-    ground_channels = [1, 2, 3, 6, 7, 17, 18, 24, 25]
-    bridge_channels = [11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23]
+        print("usage: python summarize.py ZIP_FILE")
+        sys.exit()
 
     event = quakeio.read(file_name, "csmip.zip", summarize=True)
     brdg, grnd = extract_peaks(event, bridge_channels, ground_channels)
     station, records = consolidate_records(event)
+
     # Sort records:
     sorted_records = dict(
         sorted(
@@ -165,5 +215,6 @@ if __name__ == "__main__":
             key = lambda pair: int(pair[1].pop("chan")) not in ground_channels
         )
     )
-    print(summary_B(file_name, station, brdg, grnd, sorted_records))
+
+    print(summarize(file_name, station, brdg, grnd, sorted_records))
 

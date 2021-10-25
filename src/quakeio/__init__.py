@@ -10,14 +10,14 @@ from . import (
     basic_formats,
     opensees
 )
-
-
 FILE_TYPES = {}
-FILE_TYPES.update(nga.FILE_TYPES)
-FILE_TYPES.update(csmip.FILE_TYPES)
-FILE_TYPES.update(eqsig.FILE_TYPES)
-FILE_TYPES.update(basic_formats.FILE_TYPES)
-FILE_TYPES.update(opensees.FILE_TYPES)
+# Avoid repeated dot lookup
+_register_file_type = FILE_TYPES.update
+_register_file_type(nga.FILE_TYPES)
+_register_file_type(csmip.FILE_TYPES)
+_register_file_type(eqsig.FILE_TYPES)
+_register_file_type(basic_formats.FILE_TYPES)
+_register_file_type(opensees.FILE_TYPES)
 
 DEFAULT_TYPES = {
     ".at2": "nga.at2",
@@ -42,7 +42,10 @@ def read(read_file, input_format=None, **kwds):
     return FILE_TYPES[typ]["read"](read_file, **kwds)
 
 
-def write(write_file, ground_motion, write_format=None, *args, **kwds):
+def write(write_file, ground_motion, write_format:str = None, *args, **kwds):
+    """
+    Generic ground motion writer
+    """
     if write_format:
         typ = write_format
     else:

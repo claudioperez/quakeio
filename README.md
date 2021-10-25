@@ -22,10 +22,18 @@ QuakeIO is a library of utilities for parsing ground motion files. Interfaces ar
 |`eqsig`          | &#9745;   | &#9745; | [eqsig][EQSIG]          |
 |`PEER.NGA`       | &#9745;   | &#9744; |                         |
 |`plain.tsv`      | &#9744;   | &#9744; |                         |
-|`opensees`       | &#9744;   | &#9744; |                         |
+|`opensees`       | &#9744;   | &#9745; |                         |
 |`plain.csv`      | &#9744;   | &#9744; |                         |
 |`mdof`           | &#9744;   | &#9744; |                         |
 | SimCenter.Event | &#9744;   | &#9744; |                         |
+
+## Install
+
+Run the following command:
+
+```shell
+pip install quakeio
+```
 
 
 ## Python API
@@ -33,18 +41,18 @@ QuakeIO is a library of utilities for parsing ground motion files. Interfaces ar
 ```python
 import quakeio
 
+# Read event
 csmip_event = quakeio.read("event.zip")
-csmip_event["channel-01"].accel.plot()
+
+## Extract record and rotate
+record = rec = csmip_event["bent_4_north_column_grnd_level"]
+angle = 21/7
+record.rotate(angle)
+
+# Write output
+quakeio.write("out.txt", record, write_format="opensees")
 ```
 
-```python
-csmip_event["chan001"].plot()
-```
-
-
-```python
-csmip_event["chan001"].plot_spect()
-```
 
 ## Command Line Interface
 
