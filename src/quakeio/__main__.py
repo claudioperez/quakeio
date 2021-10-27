@@ -4,6 +4,7 @@ import argparse
 
 import quakeio
 
+
 def build_parser():
     # fmt: off
     parser = argparse.ArgumentParser(
@@ -43,7 +44,7 @@ def build_parser():
         choices=list(quakeio.FILE_TYPES.keys()),
     )
     parser.add_argument(
-        "-t",
+        "-t", "--to",
         dest="write_format",
         metavar="FORMAT",
         help="Specity output file format",
@@ -63,7 +64,7 @@ def build_parser():
     )
     formats = parser.add_argument_group("Formats",
         description=f"""
-        yaml, json, csmip
+        yaml, json, csmip, opensees
         """
         # {', '.join(quakeio.FILE_TYPES.keys())}
     )
@@ -94,4 +95,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

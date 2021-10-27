@@ -9,10 +9,12 @@ import numpy as np
 
 DIRECTIONS = ["long", "tran", "up"]
 
+
 class GroundMotionEvent(dict):
     """
     Container for a collection of GroundMotionRecord objects
     """
+
     def __init__(self, records, event_date=None, **kwds):
         dict.__init__(self, **records)
         self.event_date = event_date
@@ -23,7 +25,7 @@ class GroundMotionEvent(dict):
     def get_component(self, **kwds):
         for record in self.values():
             for component in record.values():
-                if all([component[k] == v for k,v in kwds.items()]):
+                if all(component[k] == v for k, v in kwds.items()):
                     return component
 
 
@@ -31,6 +33,7 @@ class GroundMotionRecord(dict):
     """
     A container of GroundMotionComponent objects
     """
+
     def __init__(self, records: dict = {}, **kwds):
         dict.__init__(self, **records)
 
@@ -39,40 +42,42 @@ class GroundMotionRecord(dict):
         return {k: v.serialize(**kwds) for k, v in self.items()}
 
     def rotate(self, angle=None, rotation=None):
-        rx, ry = np.array([
-            [ np.cos(angle), np.sin(angle)],
-            [-np.sin(angle), np.cos(angle)]
-        ]) if not rotation else rotation
+        rx, ry = (
+            np.array([[np.cos(angle), np.sin(angle)], [-np.sin(angle), np.cos(angle)]])
+            if not rotation
+            else rotation
+        )
 
         for attr in ["accel", "veloc", "displ"]:
             x = getattr(self["long"], attr)
             y = getattr(self["tran"], attr)
-            X = np.array([x,y])
+            X = np.array([x, y])
             x[:] = np.dot(rx, X)
             y[:] = np.dot(ry, X)
 
             x, y = map(lambda d: self[d][f"peak_{attr}"], ["long", "tran"])
-            X = np.array([x,y])
+            X = np.array([x, y])
             self["long"][f"peak_{attr}"] = float(np.dot(rx, X))
             self["tran"][f"peak_{attr}"] = float(np.dot(ry, X))
         return self
-    
+
     def norm(self):
         accel = GroundMotionSeries(
-            sum(self[dirn].accel**2 
-                for dirn in ["long", "tran", "up"] 
-                   if dirn in self and self[dirn]
+            sum(
+                self[dirn].accel ** 2
+                for dirn in ["long", "tran", "up"]
+                if dirn in self and self[dirn]
             )
         )
         return GroundMotionComponent(accel, accel, accel)
 
-    def __sub__(self,other):
+    def __sub__(self, other):
         ret = copy(self)
         for dirn in DIRECTIONS:
-            ret[dirn] = self[dirn] - other[dirn] if dirn in other and dirn in self else None
+            ret[dirn] = (
+                self[dirn] - other[dirn] if dirn in other and dirn in self else None
+            )
         return ret
-        
-
 
 
 class GroundMotionComponent(dict):
@@ -85,64 +90,69 @@ class GroundMotionComponent(dict):
         self.veloc = veloc
         dict.__init__(self, **meta)
 
-    def serialize(self, 
-            ljust=0, 
-            serialize_data  = True, 
-            serialize_series= True, 
-            humanize_keys   = False, 
-            **kwds
+    def serialize(
+        self,
+        ljust=0,
+        serialize_data=True,
+        serialize_series=True,
+        humanize_keys=False,
+        **kwds,
     ) -> dict:
         if humanize_keys:
             key_name = get_schema_key_map(self.schema_file)
-            ret = {key_name(k).ljust(ljust,"."): val for k,val in self.items()}
+            ret = {key_name(k).ljust(ljust, "."): val for k, val in self.items()}
         else:
             ret = dict(self)
         if serialize_series:
             ret.update(
                 {
-                    **self.accel.serialize("accel", serialize_data=serialize_data, **kwds),
-                    **self.veloc.serialize("veloc", serialize_data=serialize_data, **kwds),
-                    **self.displ.serialize("displ", serialize_data=serialize_data, **kwds),
+                    **self.accel.serialize(
+                        "accel", serialize_data=serialize_data, **kwds
+                    ),
+                    **self.veloc.serialize(
+                        "veloc", serialize_data=serialize_data, **kwds
+                    ),
+                    **self.displ.serialize(
+                        "displ", serialize_data=serialize_data, **kwds
+                    ),
                 }
             )
         return ret
 
-
-    def __sub__(self,other):
+    def __sub__(self, other):
         ret = copy(self)
         if isinstance(other, GroundMotionComponent):
             for k in ["accel", "veloc", "displ"]:
-                setattr(ret,k,getattr(other,k) - getattr(self,k))
+                setattr(ret, k, getattr(other, k) - getattr(self, k))
 
         elif isinstance(other, (float, int)):
             for k in ["accel", "veloc", "displ"]:
-                setattr(ret, k, other - getattr(self,k))
+                setattr(ret, k, other - getattr(self, k))
         return ret
 
-    
-    def __add__(self,other):
+    def __add__(self, other):
         ret = copy(self)
         if isinstance(other, GroundMotionComponent):
             for k in ["accel", "veloc", "displ"]:
-                setattr(ret,k,getattr(other,k) + getattr(self,k))
+                setattr(ret, k, getattr(other, k) + getattr(self, k))
 
         elif isinstance(other, (float, int)):
             for k in ["accel", "veloc", "displ"]:
-                setattr(ret, k, other + getattr(self,k))
+                setattr(ret, k, other + getattr(self, k))
         return ret
 
-    def __mul__(self,other):
+    def __mul__(self, other):
         ret = copy(self)
         if isinstance(other, GroundMotionComponent):
             for k in ["accel", "veloc", "displ"]:
-                setattr(ret,k,getattr(other,k) * getattr(self,k))
+                setattr(ret, k, getattr(other, k) * getattr(self, k))
         elif isinstance(other, (float, int)):
             for k in ["accel", "veloc", "displ"]:
-                setattr(ret, k, other * getattr(self,k))
+                setattr(ret, k, other * getattr(self, k))
 
         return ret
-    
-    def __rmul__(self,other):
+
+    def __rmul__(self, other):
         return self.__mul__(other)
 
 
@@ -155,7 +165,9 @@ class GroundMotionSeries(np.ndarray):
                 setattr(obj, k, v)
         return obj
 
-    def serialize(self, key=None, summarize=False, serialize_data=True, humanize_keys=False):
+    def serialize(
+        self, key=None, summarize=False, serialize_data=True, humanize_keys=False
+    ):
         if key is None:
             key = self.series_type
 
@@ -177,6 +189,7 @@ class GroundMotionSeries(np.ndarray):
             fig, ax = plt.subplots()
         ax.plot(self)
 
+
 def rotate(data, angle):
     output = copy(data)
     if isinstance(data, GroundMotionComponent):
@@ -189,13 +202,16 @@ def rotate(data, angle):
             except KeyError:
                 warnings.warn(f"Not rotating record {name}")
 
+
 def get_schema_key_map(schema_file):
     with open(schema_file, "r") as f:
         schema = json.load(f)["properties"]
+
     def get_name(key):
         return schema[key]["title"] if key in schema else key
+
     return get_name
-    
+
 
 def write_pretty(data):
     output = copy(data)
@@ -217,9 +233,10 @@ def write_pretty(data):
                 output[name][dirn] = copy(component)
                 for k, v in component.items():
                     if k in schema and "units" not in k:
-                        output[name][dirn][schema[k]["title"]] = output[name][dirn].pop(k)
+                        output[name][dirn][schema[k]["title"]] = output[name][dirn].pop(
+                            k
+                        )
                     else:
                         pass
 
     return output
-

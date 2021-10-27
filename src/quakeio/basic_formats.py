@@ -48,8 +48,6 @@ def write_yaml(write_file, ground_motion, summarize=False, **kwds):
         yaml.dump(ground_motion, f)
 
 
-
-
 FILE_TYPES = {
     "json": {"read": read_json, "write": write_json},
     "yaml": {"read": read_yaml, "write": write_yaml},
