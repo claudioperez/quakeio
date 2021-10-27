@@ -39,6 +39,7 @@ pip install quakeio
 
 ## Python API
 
+
 ```python
 import quakeio
 
@@ -50,15 +51,19 @@ record = rec = csmip_event["bent_4_north_column_grnd_level"]
 angle = 21/7
 record.rotate(angle)
 
+## Extract rotated series
+series = record['tran'].accel
+
 # Write output
-quakeio.write("out.txt", record, write_format="opensees")
+quakeio.write("out.txt", series, write_format="opensees")
 ```
 
 
 ## Command Line Interface
 
 ```
-usage: quakeio [MODE] [OPTIONS] [FILE]
+usage: quakeio FILE [-f FORMAT] [-t FORMAT]
+
 Options:
 -c/--calculate COMMAND
  
@@ -67,16 +72,18 @@ Options:
 ```
 
 ```bash
-$ quakeio -a rot:30 chan001.v2 -t html
+$ quakeio chan001.v2 --from csmip.v2 --to opensees
 ```
 
+<!--
 Rotate and calculate Husid series.
 ```bash
 $ quakeio -c 'rot:30;husid;' chan001.v2 
 ```
+-->
 
 ```bash
-$ cat chan001.v2 | quakeio -a rot:30 -f csmip.v2 -t html | pandoc -f html -t pdf
+$ cat chan001.v2 | quakeio -f csmip.v2 -t html | pandoc -f html -t pdf
 ```
 
 ```bash
