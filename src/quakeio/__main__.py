@@ -40,14 +40,14 @@ def build_parser():
         "-f",
         dest="input_format",
         metavar="FORMAT",
-        help="Specity input file format",
+        help="Specify input file format",
         choices=list(quakeio.FILE_TYPES.keys()),
     )
     parser.add_argument(
         "-t", "--to",
         dest="write_format",
         metavar="FORMAT",
-        help="Specity output file format",
+        help="Specify output file format",
         default="json",
     )
     parser.add_argument(
