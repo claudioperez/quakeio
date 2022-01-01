@@ -6,10 +6,7 @@ import numpy as np
 import quakeio
 
 if __name__ == "__main__":
-    if len(sys.argv) > 2:
-        file_name = sys.argv[-1]
-    else:
-        file_name = "58658_007_20210426_10.09.54.P.zip"
+    file_name = sys.argv[-1]
 
 
     event = quakeio.read(file_name, "csmip.zip")
@@ -26,7 +23,7 @@ if __name__ == "__main__":
 
     avg = lambda dirn: (col_a[dirn] + col_b[dirn])*0.5
     long, tran = map(avg, ["long", "tran"])
-    
+
     print(long.accel)
     quakeio.write(sys.stdout, long, "opensees")
 

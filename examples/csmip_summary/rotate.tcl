@@ -6,6 +6,7 @@
 #puts $motion_rotation
 
 set motion_file "../../dat/58658_007_20210426_10.09.54.P/chan001.v2"
+
 set motion [exec quakeio $motion_file -t opensees]
 
 puts $motion
