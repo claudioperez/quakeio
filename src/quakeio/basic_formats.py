@@ -30,6 +30,10 @@ def write_json(write_file, ground_motion, indent=4, summarize=False, **kwds):
     except BrokenPipeError:
         pass
 
+def dumps_json(ground_motion, indent=4, summarize=False, **kwds):
+    ground_motion = ground_motion.serialize(serialize_data=not summarize)
+    return json.dumps(ground_motion, indent=indent, cls=QuakeEncoder)
+
 
 def read_yaml(read_file, **k):
     import yaml

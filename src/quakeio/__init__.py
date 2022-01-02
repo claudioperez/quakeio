@@ -49,3 +49,8 @@ def write(write_file, ground_motion, write_format: str = None, *args, **kwds):
         except KeyError:
             raise ValueError("Unable to deduce output format")
     FILE_TYPES[typ]["write"](write_file, ground_motion, *args, **kwds)
+
+def dumps(ground_motion, **kwds):
+    return basic_formats.dumps_json(ground_motion, **kwds)
+
+

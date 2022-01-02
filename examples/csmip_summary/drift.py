@@ -31,6 +31,6 @@ if __name__ == "__main__":
     relative_resp = top - bot
     # relative_resp is a series of long,tran,vert values
 
-    print(max((top - bot).norm().displ, key=abs)/height)
+    print(max((top - bot).resultant().displ, key=abs)/height)
 
 

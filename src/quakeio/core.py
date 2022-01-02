@@ -31,45 +31,47 @@ class GroundMotionEvent(dict):
 
 class GroundMotionRecord(dict):
     """
-    A container of GroundMotionComponent objects
+    A container of `GroundMotionComponent` objects.
     """
 
-    def __init__(self, records: dict = {}, **kwds):
+    def __init__(self, records: dict = {}, event=None, **kwds):
+        self._event = event
         dict.__init__(self, **records)
 
     def serialize(self, serialize_data=True, **kwds) -> dict:
-        print(kwds)
         return {k: v.serialize(**kwds) for k, v in self.items()}
 
     def rotate(self, angle=None, rotation=None):
         rx, ry = (
             np.array([[np.cos(angle), np.sin(angle)], [-np.sin(angle), np.cos(angle)]])
-            if not rotation
-            else rotation
+            if not rotation else rotation
         )
+        try:
+            for attr in ["accel", "veloc", "displ"]:
+                x = getattr(self["long"], attr)
+                y = getattr(self["tran"], attr)
+                X = np.array([x, y])
+                x[:] = np.dot(rx, X)
+                y[:] = np.dot(ry, X)
 
-        for attr in ["accel", "veloc", "displ"]:
-            x = getattr(self["long"], attr)
-            y = getattr(self["tran"], attr)
-            X = np.array([x, y])
-            x[:] = np.dot(rx, X)
-            y[:] = np.dot(ry, X)
+                x, y = map(lambda d: self[d][f"peak_{attr}"], ["long", "tran"])
+                X = np.array([x, y])
+                self["long"][f"peak_{attr}"] = float(np.dot(rx, X))
+                self["tran"][f"peak_{attr}"] = float(np.dot(ry, X))
+        except KeyError as e:
+            raise AttributeError("Attempt to rotate a record that"\
+                    f"does not have a '{e.args[0]}' component")
 
-            x, y = map(lambda d: self[d][f"peak_{attr}"], ["long", "tran"])
-            X = np.array([x, y])
-            self["long"][f"peak_{attr}"] = float(np.dot(rx, X))
-            self["tran"][f"peak_{attr}"] = float(np.dot(ry, X))
         return self
 
-    def norm(self):
-        accel = GroundMotionSeries(
-            sum(
-                self[dirn].accel ** 2
-                for dirn in ["long", "tran", "up"]
-                if dirn in self and self[dirn]
-            )
-        )
-        return GroundMotionComponent(accel, accel, accel)
+    def resultant(self):
+        displ, veloc, accel = [GroundMotionSeries(
+          sum(
+            getattr(self[dirn],vect) ** 2
+            for dirn in ["long", "tran", "up"] if dirn in self and self[dirn]
+          )
+        ) for vect in ("displ", "veloc", "accel")]
+        return GroundMotionComponent(accel, veloc, displ)
 
     def __sub__(self, other):
         ret = copy(self)
@@ -84,10 +86,11 @@ class GroundMotionComponent(dict):
     schema_dir = Path(__file__).parents[2] / "etc/schemas"
     schema_file = schema_dir / "component.schema.json"
 
-    def __init__(self, accel, veloc, displ, meta={}):
+    def __init__(self, accel, veloc, displ, record=None, meta={}):
         self.accel = accel
         self.displ = displ
         self.veloc = veloc
+        self._record = record
         dict.__init__(self, **meta)
 
     def serialize(
