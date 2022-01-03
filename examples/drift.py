@@ -1,4 +1,4 @@
-# Claudio Perez
+#bent_4_north_column_top Claudio Perez
 import numpy as np
 import quakeio
 
@@ -11,22 +11,23 @@ event = quakeio.read(file_name, "csmip.zip")
 
 #--------------------------------
 
-col_1_top_x = event.get_component(file_name="chan020.v2")
-col_1_bot_x = event.get_component(file_name="chan018.v2")
-
-diff = col_1_top_x - col_1_bot_x
-
-max_displ = max(diff.displ, key=abs)
-
-print(max_displ/height)
+#col_1_top_x = event.get_component(file_name="chan020.v2")
+#col_1_bot_x = event.get_component(file_name="chan018.v2")
+#
+#diff = col_1_top_x - col_1_bot_x
+#
+#max_displ = max(diff.displ, key=abs)
+#
+#print(max_displ/height)
 
 #--------------------------------
-top = event["bent_4_north_column_top"]
-bot = event["bent_4_north_column_grnd_level"]
+top = event.at(key="bent_4_north_column_top")
+bot = event.at(key="bent_4_north_column_grnd_level")
 
 relative_resp = top - bot
-# relative_resp is a series of long,tran,vert values
+print(relative_resp)
+# relative_resp is a record with long,tran,vert series
 
-print(max((top - bot).resultant().displ, key=abs)/height)
+print((top - bot).resultant().displ["peak_value"]/height)
 
 

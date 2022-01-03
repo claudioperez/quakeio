@@ -2,7 +2,7 @@ import json
 from copy import copy
 from pathlib import Path
 
-from quakeio.core import GroundMotionComponent, GroundMotionEvent
+from quakeio.core import QuakeComponent, QuakeCollection
 from quakeio.utils.parseutils import open_quake
 
 
