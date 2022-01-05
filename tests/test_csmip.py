@@ -58,6 +58,3 @@ def test_veloc_data():
 
 # csmip_record = quakeio.QuakeComponent(csmip_dir/"chan001.v2")
 
-# csmip_record.peak_accel
-
-# csmip_record.plot_accel
