@@ -1,4 +1,5 @@
 PACKAGE = quakeio
+PYTHON = /usr/bin/env python
 VRNPATN = '__version__ = "([^"]+)"'
 VERSION = $(shell sed -nE 's:__version__ = "([^"]+)":\1:p' ./src/$(PACKAGE)/__init__.py)
 # Documentation
@@ -32,7 +33,7 @@ web: FORCE
 docs: web FORCE
 
 publish:
-	python setup.py clean --all sdist bdist_wheel
+	$(PYTHON) setup.py clean --all sdist bdist_wheel
 	twine upload --verbose --skip-existing dist/*
 	git tag -a $(VERSION) -m 'version $(VERSION)'
 	git push --tags
