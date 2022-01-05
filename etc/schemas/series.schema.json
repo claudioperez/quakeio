@@ -1,0 +1,50 @@
+{
+  "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc",
+  "type": "object",
+  "title": "The veloc schema",
+  "default": {},
+  "required": [
+      "units",
+      "shape",
+      "time_step"
+  ],
+  "additionalProperties": true,
+  "properties": {
+      "peak_value": {
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/peak_value",
+          "type": "number",
+          "title": "The peak_value schema",
+          "default": 0.0
+      },
+      "units": {
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/units",
+          "type": "string",
+          "title": "The units schema"
+      },
+      "peak_time": {
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/peak_time",
+          "type": "number",
+          "title": "The peak_time schema"
+      },
+      "shape": {
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/shape",
+          "type": "integer",
+          "title": "The shape schema"
+      },
+      "time_step": {
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/time_step",
+          "type": "number",
+          "title": "The time_step schema"
+      },
+      "data": {
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/data",
+          "type": "array",
+          "title": "The data schema",
+          "default": [],
+          "additionalItems": true,
+          "items": {
+              "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/data/items"
+          }
+      }
+  }
+}

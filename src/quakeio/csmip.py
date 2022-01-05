@@ -49,7 +49,7 @@ words = lambda x: CRE_WHITE.sub(" ", str(x)).strip()
 HEADER_FIELDS = {
     # line 1
     ("_", "record.record_identifier"): ((str, str),
-        re.compile("([A-z ]*) ([A-z0-9\-\.]*)")
+        re.compile(r"([A-z ]*) ([A-z0-9\-\.]*)")
     ),
     # line 6
     ("record.station.no", "record.station.coord"): ((str, str),

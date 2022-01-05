@@ -1,0 +1,46 @@
+{
+    "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/filters/items/anyOf/0",
+    "type": "object",
+    "title": "QuakeFilter Schema",
+    "default": {},
+    "required": ["filter_type"],
+    "properties": {
+        "filter_type": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/filters/items/anyOf/0/properties/filter_type",
+            "type": "string",
+            "title": "The filter_type schema",
+            "default": ""
+        },
+        "point": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/filters/items/anyOf/0/properties/point",
+            "type": "number",
+            "title": "The point schema",
+            "default": 0.0
+        },
+        "point.units": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/filters/items/anyOf/0/properties/point.units",
+            "type": "string",
+            "title": "The point.units schema",
+            "default": ""
+        },
+        "limit_low": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/filters/items/anyOf/0/properties/limit_low",
+            "type": "number",
+            "title": "The limit_low schema",
+            "default": 0.0
+        },
+        "limit_high": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/filters/items/anyOf/0/properties/limit_high",
+            "type": "number",
+            "title": "The limit_high schema",
+            "default": 0.0
+        },
+        "limit.units": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/filters/items/anyOf/0/properties/limit.units",
+            "type": "string",
+            "title": "The limit.units schema",
+            "default": ""
+        }
+    },
+    "additionalProperties": true
+}
