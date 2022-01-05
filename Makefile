@@ -16,6 +16,7 @@ cov:
 	coverage run --source=. -m pytest
 	coverage-badge > ./etc/coverage/cov.svg
 test:
+	bash tests/tests.sh
 	pytest
 
 api:

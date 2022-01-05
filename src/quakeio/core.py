@@ -10,88 +10,158 @@ import numpy as np
 DIRECTIONS = ["long", "tran", "up"]
 
 
-class GroundMotionEvent(dict):
+class QuakeCollection(dict):
     """
-    Container for a collection of GroundMotionRecord objects
+    Container for a collection of QuakeMotion objects
     """
 
-    def __init__(self, records, event_date=None, **kwds):
-        dict.__init__(self, **records)
+    def __init__(self, motions, event_date=None, meta=None, **kwds):
+        meta = meta if meta is not None else {}
+        dict.__init__(self, **meta)
+        self.motions = motions
         self.event_date = event_date
 
+    def __repr__(self):
+        return f"QuakeCollection({dict.__repr__(self)})"
+
     def serialize(self, serialize_data=True, **kwds) -> dict:
-        return {k: v.serialize(**kwds) for k, v in self.items()}
+        #return {k: v.serialize(**kwds) for k, v in self.items()}
+        return {"motions": [i.serialize(**kwds) for i in self.motions.values()]}
+
+    def at(self,**kwds):
+        for motion in self.motions.values():
+            if all(motion[k] == v for k, v in kwds.items()):
+                return motion
+
+        return self.get_component(**kwds)
 
     def get_component(self, **kwds):
-        for record in self.values():
-            for component in record.values():
+        for motion in self.motions.values():
+            for component in motion.components.values():
                 if all(component[k] == v for k, v in kwds.items()):
                     return component
 
 
-class GroundMotionRecord(dict):
+class QuakeMotion(dict):
     """
-    A container of `GroundMotionComponent` objects.
+    A container of `QuakeComponent` objects.
     """
+    def _update_components(f):
+        def wrapped(*args, **kwds):
+            res = f(*args, **kwds)
+            [getattr(cmp,s)._refresh() 
+                    for cmp in res.components.values()
+                        for s in ["accel","veloc","displ"] if hasattr(cmp,s)]
+            return res
+        return wrapped
 
-    def __init__(self, records: dict = {}, event=None, **kwds):
-        self._event = event
-        dict.__init__(self, **records)
+    def __init__(self, components: dict = None, meta:dict=None):
+        dict.__init__(self)
+        self.directions = ["long", "tran", "up"]
+        self.components = components if components is not None else {}
+        #for k,v in self.components.items():
+        #    setattr(self,k,v)
+        self.update(meta if meta is not None else {})
+
+    @property
+    def long(self):
+        return self.components["long"]
+    @property
+    def tran(self):
+        return self.components["tran"]
+
+    def __repr__(self):
+        #return f"QuakeMotion({dict.__repr__(self)})"
+        return f"QuakeMotion({dict.__repr__(self)})"
+    
+    def __sub__(self, other):
+        ret = copy(self)
+        ret.components = {}
+        for dirn in DIRECTIONS:
+            if dirn in other.components and dirn in self.components:
+                ret.components[dirn] = (
+                    self.components[dirn] - other.components[dirn] 
+                )
+        return ret
+    
+    def __add__(self, other):
+        ret = copy(self)
+        ret.components = {}
+        for dirn in DIRECTIONS:
+            ret.components[dirn] = (
+                self.components[dirn] + other.components[dirn] 
+                if dirn in other.components and dirn in self.components else None
+            )
+        return ret
+    
+    def __rsub__(self, other):
+        return self.__sub__(other)
+    
+    def __radd__(self, other):
+        return self.__add__(other)
+
 
     def serialize(self, serialize_data=True, **kwds) -> dict:
-        return {k: v.serialize(**kwds) for k, v in self.items()}
+        return {
+            **self,
+            "components": [c.serialize(**kwds) for c in self.components.values()]
+        }
 
+    @_update_components
     def rotate(self, angle=None, rotation=None):
         rx, ry = (
-            np.array([[np.cos(angle), np.sin(angle)], [-np.sin(angle), np.cos(angle)]])
+            np.array([[ np.cos(angle), np.sin(angle)], 
+                      [-np.sin(angle), np.cos(angle)]])
             if not rotation else rotation
         )
         try:
             for attr in ["accel", "veloc", "displ"]:
-                x = getattr(self["long"], attr)
-                y = getattr(self["tran"], attr)
+                x = getattr(self.components["long"], attr).data
+                y = getattr(self.components["tran"], attr).data
                 X = np.array([x, y])
                 x[:] = np.dot(rx, X)
                 y[:] = np.dot(ry, X)
 
-                x, y = map(lambda d: self[d][f"peak_{attr}"], ["long", "tran"])
-                X = np.array([x, y])
-                self["long"][f"peak_{attr}"] = float(np.dot(rx, X))
-                self["tran"][f"peak_{attr}"] = float(np.dot(ry, X))
+                #x, y = map(lambda d: self.components[d][f"peak_{attr}"], ["long", "tran"])
+                #X = np.array([x, y])
+                #self.components["long"][f"peak_{attr}"] = float(np.dot(rx, X))
+                #self.components["tran"][f"peak_{attr}"] = float(np.dot(ry, X))
+
         except KeyError as e:
-            raise AttributeError("Attempt to rotate a record that"\
+            raise AttributeError("Attempt to rotate a motion that"\
                     f"does not have a '{e.args[0]}' component")
 
         return self
 
     def resultant(self):
-        displ, veloc, accel = [GroundMotionSeries(
-          sum(
-            getattr(self[dirn],vect) ** 2
-            for dirn in ["long", "tran", "up"] if dirn in self and self[dirn]
-          )
-        ) for vect in ("displ", "veloc", "accel")]
-        return GroundMotionComponent(accel, veloc, displ)
-
-    def __sub__(self, other):
-        ret = copy(self)
-        for dirn in DIRECTIONS:
-            ret[dirn] = (
-                self[dirn] - other[dirn] if dirn in other and dirn in self else None
-            )
-        return ret
+        # initialize
+        series = {k:None for k in ("displ", "veloc", "accel")}
+        for typ in series.keys():
+            try:
+                series[typ] = sum(
+                    getattr(self.components[dirn],typ) ** 2
+                    for dirn in self.directions 
+                        if dirn in self.components and self.components[dirn]
+                )
+            except AttributeError as e:
+                raise e
+        return QuakeComponent(*series.values())
 
 
-class GroundMotionComponent(dict):
+class QuakeComponent(dict):
     schema_dir = Path(__file__).parents[2] / "etc/schemas"
     schema_file = schema_dir / "component.schema.json"
 
-    def __init__(self, accel, veloc, displ, record=None, meta={}):
+    def __init__(self, accel, veloc, displ, record=None, meta=None):
+        meta = meta if meta is not None else {}
         self.accel = accel
         self.displ = displ
         self.veloc = veloc
         self._record = record
         dict.__init__(self, **meta)
+
+    def __repr__(self):
+        return f"QuakeComponent({self['file_name']}) at {hex(id(self))}"
 
     def serialize(
         self,
@@ -109,13 +179,13 @@ class GroundMotionComponent(dict):
         if serialize_series:
             ret.update(
                 {
-                    **self.accel.serialize(
+                    "accel": self.accel.serialize(
                         "accel", serialize_data=serialize_data, **kwds
                     ),
-                    **self.veloc.serialize(
+                    "veloc": self.veloc.serialize(
                         "veloc", serialize_data=serialize_data, **kwds
                     ),
-                    **self.displ.serialize(
+                    "displ": self.displ.serialize(
                         "displ", serialize_data=serialize_data, **kwds
                     ),
                 }
@@ -124,7 +194,7 @@ class GroundMotionComponent(dict):
 
     def __sub__(self, other):
         ret = copy(self)
-        if isinstance(other, GroundMotionComponent):
+        if isinstance(other, QuakeComponent):
             for k in ["accel", "veloc", "displ"]:
                 setattr(ret, k, getattr(other, k) - getattr(self, k))
 
@@ -135,7 +205,7 @@ class GroundMotionComponent(dict):
 
     def __add__(self, other):
         ret = copy(self)
-        if isinstance(other, GroundMotionComponent):
+        if isinstance(other, QuakeComponent):
             for k in ["accel", "veloc", "displ"]:
                 setattr(ret, k, getattr(other, k) + getattr(self, k))
 
@@ -146,59 +216,118 @@ class GroundMotionComponent(dict):
 
     def __mul__(self, other):
         ret = copy(self)
-        if isinstance(other, GroundMotionComponent):
+        if isinstance(other, QuakeComponent):
             for k in ["accel", "veloc", "displ"]:
                 setattr(ret, k, getattr(other, k) * getattr(self, k))
         elif isinstance(other, (float, int)):
             for k in ["accel", "veloc", "displ"]:
-                setattr(ret, k, other * getattr(self, k))
-
+                setattr(ret, k,  other * getattr(self, k))
         return ret
+    
+    def __rsub__(self, other):
+        return self.__sub__(other)
+    
+    def __radd__(self, other):
+        return self.__add__(other)
 
     def __rmul__(self, other):
         return self.__mul__(other)
 
 
-class GroundMotionSeries(np.ndarray):
-    def __new__(cls, input_array, metadata={}):
-        obj = np.asarray(input_array).view(cls)
+class QuakeSeries(dict):
+    def _update_metadata(f):
+        def wrapped(*args, **kwds):
+            res = f(*args, **kwds)
+            res._refresh()
+            return res
+        return wrapped
 
-        for k, v in metadata.items():
-            if not hasattr(obj, k):
-                setattr(obj, k, v)
-        return obj
+    def __init__(self, input_array, meta=None):
+        self._data = np.asarray(input_array)
+        assert len(self.data.shape) == 1
+        self.update(meta if meta is not None else {})
 
+    def _refresh(self):
+        self["peak_value"] = max(self._data, key=abs)
+
+    @property
+    def data(self):
+        return self._data
+
+    def __repr__(self):
+        return f"QuakeSeries({self['units']})" #{dict.__repr__(self)})"
+    
     def serialize(
         self, key=None, summarize=False, serialize_data=True, humanize_keys=False
     ):
-        if key is None:
-            key = self.series_type
 
         attributes = {
-            ".".join((key, k)): v for k, v in self.__dict__.items() if k[0] != "_"
+            #".".join((key, k)): v for k,v in self.items() if k[0] != "_"
+            k: v for k,v in self.items() if k[0] != "_"
         }
         if serialize_data and not summarize:
-            attributes.update({key: list(self)})
+            attributes.update({"data": list(self.data)})
         return attributes
 
-    def __array_finalize__(self, obj):
-        for k, v in self.__dict__.items():
-            setattr(obj, k, v)
+    @_update_metadata
+    def __pow__(self, other):
+        ret = copy(self)
+        ret._data = ret.data**other
+        return ret
 
+    @_update_metadata
+    def __sub__(self, other):
+        ret = copy(self)
+        if isinstance(other, QuakeSeries):
+            ret._data = other.data - self.data
+
+        elif isinstance(other, (float, int)):
+            ret._data = other - self.data
+        return ret
+
+    @_update_metadata
+    def __add__(self, other):
+        ret = copy(self)
+        if isinstance(other, QuakeSeries):
+            ret._data += other.data
+
+        elif isinstance(other, (float, int)):
+            ret._data += other
+        return ret
+    
+    @_update_metadata
+    def __mul__(self, other):
+        if isinstance(other, (float, int)):
+            ret = copy(self)
+            ret._data *= other
+        else:
+            raise TypeError()
+        return ret
+    
+    def __rsub__(self, other):
+        return self.__sub__(other)
+    
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+    
     def plot(self, ax=None, fig=None):
         import matplotlib.pyplot as plt
 
         if ax is None:
             fig, ax = plt.subplots()
-        ax.plot(self)
+        ax.plot(self.data)
+
 
 
 def rotate(data, angle):
     output = copy(data)
-    if isinstance(data, GroundMotionComponent):
+    if isinstance(data, QuakeComponent):
         raise Exception("Unable to rotate single component")
 
-    elif isinstance(data, GroundMotionEvent):
+    elif isinstance(data, QuakeCollection):
         for name, record in data.items():
             try:
                 record.rotate(angle)
@@ -222,14 +351,14 @@ def write_pretty(data):
     schema_file = schema_dir / "component.schema.json"
     with open(schema_file, "r") as f:
         schema = json.load(f)["properties"]
-    if isinstance(data, GroundMotionComponent):
+    if isinstance(data, QuakeComponent):
         for k in data:
             if k in schema and "units" not in k:
                 output[schema[k]["title"]] = output.pop(k)
             else:
                 pass
 
-    elif isinstance(data, GroundMotionEvent):
+    elif isinstance(data, QuakeCollection):
         for name, record in data.items():
             output[name] = copy(record)
             for dirn, component in record.items():

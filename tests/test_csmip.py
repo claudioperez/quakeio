@@ -13,8 +13,9 @@ def test_read_event():
 
 def test_unique():
     event = test_read_event()
-    all_records = [r for g in event.values() for r in g.values()]
-    assert len(all_records) == 20
+    all_components = [c for m in event.motions.values() for c in m.components]
+    #all_components = [m for m in event.motions]# for c in m.components]
+    assert len(all_components) == 20
 
 #----------------------------------------------------------------------
 # Record (.v2)
@@ -31,31 +32,31 @@ def test_read():
 
 
 def test_peak():
-    csmip_record = test_read()
-    assert csmip_record["peak_accel"] == 17.433
-    assert csmip_record["peak_veloc"] == 0.205
-    assert csmip_record["peak_displ"] == -0.004
+    csmip_motion = test_read()
+    assert csmip_motion.accel["peak_value"] == 17.433
+    assert csmip_motion.veloc["peak_value"] == 0.205
+    assert csmip_motion.displ["peak_value"] == -0.004
 
 
 def test_peak_time():
-    csmip_record = test_read()
-    assert csmip_record["peak_accel.time"] == 20.270
-    assert csmip_record["peak_veloc.time"] == 20.290
-    assert csmip_record["peak_displ.time"] == 20.270
+    csmip_motion = test_read()
+    assert csmip_motion.accel["peak_time"] == 20.270
+    assert csmip_motion.veloc["peak_time"] == 20.290
+    assert csmip_motion.displ["peak_time"] == 20.270
 
 def test_accel_data():
     csmip_record = test_read()
-    assert csmip_record.accel[0]  == -0.000102
-    assert csmip_record.accel[-1] ==  0.000105
+    assert csmip_record.accel.data[0]  == -0.000102
+    assert csmip_record.accel.data[-1] ==  0.000105
 
 def test_veloc_data():
     csmip_record = test_read()
-    assert csmip_record.veloc[0]  == 0.0000950
-    assert csmip_record.veloc[-1] == 0.0001009
+    assert csmip_record.veloc.data[0]  == 0.0000950
+    assert csmip_record.veloc.data[-1] == 0.0001009
 
 
 
-# csmip_record = quakeio.GroundMotionComponent(csmip_dir/"chan001.v2")
+# csmip_record = quakeio.QuakeComponent(csmip_dir/"chan001.v2")
 
 # csmip_record.peak_accel
 

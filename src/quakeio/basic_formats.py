@@ -2,7 +2,7 @@ import json
 from copy import copy
 from pathlib import Path
 
-from quakeio.core import GroundMotionComponent, GroundMotionEvent
+from quakeio.core import QuakeComponent, QuakeCollection, QuakeSeries
 from quakeio.utils.parseutils import open_quake
 
 
@@ -16,6 +16,18 @@ class QuakeEncoder(json.JSONEncoder):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
+def read_basic(data:dict):
+    if "motions" in data:
+        for motion in data["motions"]:
+            for component in motion["components"]:
+                pass
+    else:
+        raise ValueError()
+    pass
+
+def create_series(data):
+    series = data.pop("data")
+    return QuakeSeries(series, meta=data)
 
 def read_json(read_file, **kwds: Unused):
 
