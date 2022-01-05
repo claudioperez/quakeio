@@ -28,9 +28,12 @@ class QuakeCollection(dict):
         #return {k: v.serialize(**kwds) for k, v in self.items()}
         return {"motions": [i.serialize(**kwds) for i in self.motions.values()]}
 
+    def match(self, **kwds):
+        pass
+
     def at(self,**kwds):
         for motion in self.motions.values():
-            if all(motion[k] == v for k, v in kwds.items()):
+            if all(k in motion and motion[k] == v for k, v in kwds.items()):
                 return motion
 
         return self.get_component(**kwds)

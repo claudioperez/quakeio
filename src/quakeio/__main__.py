@@ -21,6 +21,9 @@ def build_parser():
     modes.add_argument("-S", "--summarize", action="store_true",
         help="Omit time series data and superfluous fields from output"
     )
+    modes.add_argument("-v", "--verbose", dest="verbosity", action="count", default=0,
+        help="Increase output verbosity"
+    )
 
     parser.add_argument("read_file", metavar="FILE", nargs="?", default="-")
     parser.add_argument(
@@ -42,6 +45,15 @@ def build_parser():
         metavar="FORMAT",
         help="Specify input file format",
         choices=list(quakeio.FILE_TYPES.keys()),
+    )
+    parser.add_argument(
+        "-x",
+        "--exclude",
+        dest="exclusions",
+        metavar="KEY",
+        help="Specify keys to exclude by parser",
+        action="append",
+        default=[]
     )
     parser.add_argument(
         "-t", "--to",

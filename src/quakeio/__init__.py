@@ -1,5 +1,5 @@
 # Claudio Perez
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 from pathlib import Path
 
@@ -20,6 +20,7 @@ DEFAULT_TYPES = {
     ".AT2": "nga.at2",
     ".zip": "csmip.zip",
     ".v2": "csmip.v2",
+    ".V2": "csmip.v2",
     ".json": "json",
 }
 
@@ -28,7 +29,7 @@ def read(read_file, input_format=None, **kwds):
     """
     Generic ground motion reader
     """
-    if input_format:
+    if input_format is not None:
         typ = input_format
     else:
         try:

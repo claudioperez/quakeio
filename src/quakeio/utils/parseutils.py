@@ -14,9 +14,10 @@ CRE_WHITE = re.compile("\\W+")
 
 
 def maybe_t(pattern: str, typ: Callable, strict: bool = True):
+    cpattern = re.compile(pattern, re.IGNORECASE)
     def proc(match):
         if match:
-            return typ(re.search(pattern, match).group(1))
+            return typ(re.search(cpattern, match).group(1))
         else:
             return None
 

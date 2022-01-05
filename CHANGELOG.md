@@ -1,5 +1,12 @@
 ## 0.1 
 
+### 0.1.3
+
+- Add verbosity switch
+- Test and fix CSMIP.V2 parser against more samples.
+    - make case-insensitive
+    - add handling for `.V2` (upper-case) file extensions
+
 ### 0.1.0 January 2022
 - Redesign and renaming of core classes.
 - Add support for Python 3.6.
