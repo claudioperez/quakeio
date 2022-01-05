@@ -1,9 +1,9 @@
 # Claudio Perez
-__version__ = "0.1.0"
 
 from pathlib import Path
 
-from . import csmip, nga, eqsig, basic_formats, opensees
+from . import csmip, nga, eqsig, basic_formats, opensees, version
+
 
 FILE_TYPES = {}
 # Avoid repeated dot lookup
