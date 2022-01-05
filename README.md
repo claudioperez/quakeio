@@ -37,68 +37,6 @@ pip install quakeio
 ```
 
 
-## Python API
-
-
-```python
-import quakeio
-
-# Read event
-csmip_event = quakeio.read("event.zip")
-
-## Extract record and rotate
-record = rec = csmip_event["bent_4_north_column_grnd_level"]
-angle = 21/7
-record.rotate(angle)
-
-## Extract rotated series
-series = record['tran'].accel
-
-# Write output
-quakeio.write("out.txt", series, write_format="opensees")
-```
-
-
-## Command Line Interface
-
-```
-usage: quakeio FILE [-f FORMAT] [-t FORMAT]
-
-Options:
--c/--calculate COMMAND
- 
--f/--from FORMAT
--t/--to   FORMAT
-```
-
-```bash
-$ quakeio chan001.v2 --from csmip.v2 --to opensees
-```
-
-<!--
-Rotate and calculate Husid series.
-```bash
-$ quakeio -c 'rot:30;husid;' chan001.v2 
-```
--->
-
-```bash
-$ cat chan001.v2 | quakeio -f csmip.v2 -t html | pandoc -f html -t pdf
-```
-
-```bash
-$ cat chan001.v2 \
-    | quakeio -a rot:30 -f csmip.v2 -t html -x [*].data \
-    | pandoc -f html -t pdf
-```
-
-## MATLAB Interface
-
-```matlab
-Motion = quakeIO.read('csmip.zip')
-```
-
-
 
 <!-- Reference links -->
 [EQSIG]: https://github.com/eng-tools/eqsig
@@ -113,7 +51,7 @@ Motion = quakeIO.read('csmip.zip')
 [pypi-v-link]: https://pypi.org/project/quakeio
 [build-img]: https://github.com/claudioperez/quakeio/actions/workflows/base.yml/badge.svg
 [cov-img]: https://raw.githubusercontent.com/claudioperez/quakeio/master/etc/coverage/cov.svg
-[gh-link]: https://github.com/claudioperez/quakeio/compare/0.0.5...master
-[gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/0.0.5?style=social
+[gh-link]: https://github.com/claudioperez/quakeio/compare/0.1.0...master
+[gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/0.1.0?style=social
 
 
