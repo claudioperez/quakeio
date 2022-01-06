@@ -72,6 +72,7 @@ class Spectrum:
         if len(tsa) > 2:
             for sa in tsa[1:]:
                 self.ax.plot(tsa[0], sa)
+        self.ax.set_title(self._accel["location_name"])
 
 
 class TransferFunction:
@@ -98,16 +99,15 @@ def _accel_spectrum(accel,dt,damping,per,gamma=1/2,beta=1/4,interp=None):
     SA[0,:] = per[:]
 
     for di,dmp in enumerate(damping):
-
         for i in range(numper):
             if dt/per[i]>0.02:
-                dtp=per[i]*0.02;
-                dtpx=np.arange(0,max(t),dtp)
-                dtpx=dtpx
-                accfrni=interp(t, accel)(dtpx);
-                accfrn=accfrni[1:len(accfrni)-1];
-                numdatan=len(accfrn);
-                p=-m*accfrn;
+                dtp = per[i]*0.02
+                dtpx = np.arange(0,max(t),dtp)
+                dtpx = dtpx
+                accfrni = interp(t, accel)(dtpx)
+                accfrn = accfrni[1:len(accfrni)-1]
+                numdatan = len(accfrn)
+                p = -m*accfrn
             else:
                 dtp=dt;
                 accfrn = accel;
@@ -123,19 +123,19 @@ def _accel_spectrum(accel,dt,damping,per,gamma=1/2,beta=1/4,interp=None):
             kstar = k + gamma*c/(beta*dtp) + m/(beta*dtp**2.0)
             acons = m/(beta*dtp) + gamma*c/beta
             bcons = m/(2*beta) + dtp*(gamma/(2*beta)-1)*c
-            u[0] = u0;
-            v[0] = v0;
-            a[0] = (p[0]-c*v[0]-k*u[0])/m;
+            u[0] = u0
+            v[0] = v0
+            a[0] = (p[0]-c*v[0]-k*u[0])/m
             for j in range(1,numdatan):
-                deltap=p[j]-p[j-1];
-                deltaph=deltap+acons*v[j-1]+bcons*a[j-1];
-                deltau=deltaph/kstar;
-                deltav=gamma*deltau/(beta*dtp)-gamma*v[j-1]/beta+dtp*(1-gamma/(2*beta))*a[j-1];
-                deltaa=deltau/(beta*dtp**2)-v[j-1]/(beta*dtp)-a[j-1]/(2*beta);
-                u[j]=u[j-1] + deltau;
-                v[j]=v[j-1] + deltav;
-                a[j]=a[j-1] + deltaa;
-            atot=a+accfrn;
-            SA[1+di,i]=abs(max(atot, key=abs));
+                deltap = p[j]-p[j-1]
+                deltaph = deltap+acons*v[j-1]+bcons*a[j-1]
+                deltau = deltaph/kstar
+                deltav = gamma*deltau/(beta*dtp)-gamma*v[j-1]/beta+dtp*(1-gamma/(2*beta))*a[j-1]
+                deltaa = deltau/(beta*dtp**2)-v[j-1]/(beta*dtp)-a[j-1]/(2*beta)
+                u[j] = u[j-1] + deltau
+                v[j] = v[j-1] + deltav
+                a[j] = a[j-1] + deltaa
+            atot = a + accfrn
+            SA[1+di,i] = abs(max(atot, key = abs));
     return SA
 

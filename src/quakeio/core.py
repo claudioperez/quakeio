@@ -24,6 +24,12 @@ class QuakeCollection(dict):
     def __repr__(self):
         return f"QuakeCollection({dict.__repr__(self)})"
 
+    @property
+    def components(self):
+        for motion in self.motions.values():
+            for component in motion.components.values():
+                yield component
+
     def serialize(self, serialize_data=True, **kwds) -> dict:
         #return {k: v.serialize(**kwds) for k, v in self.items()}
         return {"motions": [i.serialize(**kwds) for i in self.motions.values()]}
