@@ -24,7 +24,7 @@ def plot_grid(series, label=None):
 
 
 def _plot_func(plot):
-    plt.style.use("berkeley")
+    plt.style.use("typewriter")
 
     def __call__(self, *args, **kwds):
         if "ax" in kwds:
@@ -99,10 +99,11 @@ class Spectrum:
 class TransferFunction(Spectrum):
     def __init__(self, pairs, **kwds):
         self._pairs = pairs
+        self.kwds = kwds
 
     @_plot_func
     def plot(self, **kwds):
-        self.tf = tsa = transfer_function(self._pairs, **kwds)
+        self.tf = tsa = transfer_function(self._pairs, **self.kwds)
         if len(tsa) >= 2:
             for sa in tsa[1:]:
                 self.ax.plot(tsa[0], sa)

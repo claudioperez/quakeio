@@ -36,9 +36,10 @@ class QuakeCollection(dict):
 
     @property
     def components(self):
-        return {k:v for m in self.motions.values() 
-                    for k,v in m.components.items()
-        }
+        for m in self.motions.values():
+            for v in m.components.values():
+                yield v
+
 
     def match(self, **kwds):
         pass
@@ -123,6 +124,12 @@ class QuakeMotion(dict):
         }
 
     @_update_components
+    def slice(self, *args):
+        for c in self.components.values():
+            c.slice(*args)
+        return self
+
+    @_update_components
     def rotate(self, angle=None, rotation=None):
         rx, ry = (
             np.array([[ np.cos(angle), np.sin(angle)], 
@@ -150,14 +157,14 @@ class QuakeMotion(dict):
 
     def resultant(self):
         # initialize
-        series = {k:None for k in ("displ", "veloc", "accel")}
-        for typ in series.keys():
+        series = {k:None for k in ("accel", "veloc", "displ")}
+        for typ in series:
             try:
-                series[typ] = sum(
-                    getattr(self.components[dirn],typ) ** 2
+                series[typ] = np.sqrt(sum(
+                    np.power(getattr(self.components[dirn],typ), 2)
                     for dirn in self.directions 
                         if dirn in self.components and self.components[dirn]
-                ).sqrt()
+                ))#.sqrt()
             except AttributeError as e:
                 raise e
         return QuakeComponent(*series.values())
@@ -181,6 +188,11 @@ class QuakeComponent(dict):
 
     def __repr__(self):
         return f"QuakeComponent({self['file_name']}) at {hex(id(self))}"
+    
+    def slice(self, *args):
+        for s in "accel","veloc","displ":
+            getattr(self,s).slice(*args)
+        return self
 
     def serialize(
         self,
@@ -263,10 +275,12 @@ class QuakeSeries(dict):
             return res
         return wrapped
 
-    def __init__(self, input_array, meta=None):
+    def __init__(self, input_array, meta=None, time_zero=0.0):
         self._data = np.asarray(input_array)
         assert len(self.data.shape) == 1
         self.update(meta if meta is not None else {})
+        self._time = None
+        self.time_zero = time_zero
 
     def __getitem__(self, key):
         try:
@@ -275,14 +289,16 @@ class QuakeSeries(dict):
             return self._parent[key]
 
     def _refresh(self):
-        self["peak_value"] = max(self._data, key=abs)
+        self["peak_value"] = max(self.data, key=abs)
+        return self
 
     @property
     def data(self):
         return self._data
 
     def __repr__(self):
-        return f"QuakeSeries({self['units']})" #{dict.__repr__(self)})"
+        filename=hex(id(self))
+        return f"QuakeSeries({filename},{self['units']})" #{dict.__repr__(self)})"
     
     def serialize(
         self, key=None, summarize=False, serialize_data=True, humanize_keys=False
@@ -299,7 +315,7 @@ class QuakeSeries(dict):
     @_update_metadata
     def __pow__(self, other):
         ret = copy(self)
-        ret._data = ret.data**other
+        ret._data = np.power(ret.data, other)
         return ret
 
     @_update_metadata
@@ -337,6 +353,14 @@ class QuakeSeries(dict):
         out = self._data if inplace else None
         ret._data = np.sqrt(self._data, out=out)
         return ret
+
+    def __array__(self,dtype=None):
+        return self._data
+    
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwds):
+        if method=="__call__":
+            inputs = [i.data if isinstance(i,self.__class__) else i for i in inputs]
+            return self.__class__(ufunc(*inputs, **kwds),meta=self,time_zero=self.time_zero)._refresh()
     
     def __rsub__(self, other):
         return self.__sub__(other)
@@ -346,9 +370,27 @@ class QuakeSeries(dict):
 
     def __rmul__(self, other):
         return self.__mul__(other)
+
+    @property
+    def time(self):
+        if self._time is None:
+            dt = self["time_step"]
+            t0 = self.time_zero
+            self._time = np.arange(t0,t0+dt*len(self.data),dt)
+        return self._time
+
+    def slice(self,*args):
+        time = self.time
+        idx = (args[0] < time) & (time < args[1])
+        self._time = time[idx]
+        self.time_zero = self._time[0]
+        self._data = self.data[idx]
+        return self
     
-    def plot(self, ax=None, fig=None, label=None, **kwds):
+    def plot(self, ax=None, fig=None, label=None, index=(None,),**kwds):
         import matplotlib.pyplot as plt
+        idx = slice(*index)
+        time = self.time
 
         if ax is None:
             fig, ax = plt.subplots()
@@ -356,9 +398,10 @@ class QuakeSeries(dict):
             label=self[label]
         if label is not None:
             kwds["label"] = label
-        ax.plot(self.data, **kwds)
+        ax.plot(time[idx],self.data[idx], **kwds)
         ax.set_ylabel(f"({self['units']})")
         ax.set_xlabel("time (sec.)")
+        return ax
 
 
 
