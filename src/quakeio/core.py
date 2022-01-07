@@ -4,8 +4,14 @@ import json
 from copy import copy
 from pathlib import Path
 import warnings
+from enum import Enum
 
 import numpy as np
+
+class st(Enum): ACCEL, DISPL, VELOC = range(3)
+class dt(Enum): LONG, TRAN, VERT = range(3)
+class pt(Enum): SECT, PLAN, ELEV = range(3)
+
 
 DIRECTIONS = ["long", "tran", "up"]
 
