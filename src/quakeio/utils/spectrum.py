@@ -8,6 +8,21 @@ from numpy import pi
 import matplotlib.pyplot as plt
 from quakeio.core import QuakeComponent, QuakeSeries
 
+#COLORS = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+def plot_grid(series, label=None):
+    fig, ax = plt.subplots(len(series),1,sharex=True)
+    cycler = ax[0]._get_lines.prop_cycler
+    lbl = (lambda x: x[label]) if label is not None else lambda x: None
+    if label is not None and not isinstance(label,(tuple,list)):
+        label = [s[label] for s in series]
+    for i,s in enumerate(series):
+        s.plot(ax=ax[i],label=label[i],color=next(cycler)['color'])
+
+    if label is not None:
+        fig.legend()
+
+
 def _plot_func(plot):
     plt.style.use("berkeley")
 
@@ -42,12 +57,16 @@ class Spectrum:
             from scipy.interpolate import interp1d as interp
         if damping is None:
             damping = ("damping" in self.kwds and self.kwds.pop("damping")) or 0.0
+        
+        if accel is None:
+            accel = self._accel
         if isinstance(accel, QuakeComponent):
             dt = accel.accel["time_step"]
             accel = accel.accel.data
         elif isinstance(accel, QuakeSeries):
             dt = accel["time_step"]
             accel = accel.data
+
         if isinstance(damping, float):
             damping = [damping]
 
@@ -72,14 +91,29 @@ class Spectrum:
         if len(tsa) > 2:
             for sa in tsa[1:]:
                 self.ax.plot(tsa[0], sa)
+        self.ax.set_xlabel(f"Period, (sec.)")
+        chn = self._accel["channel"]
+        self.ax.set_title(f"Response spectrum (Chn. {chn})")
 
 
-class TransferFunction:
-    pass
+class TransferFunction(Spectrum):
+    def __init__(self, pairs, **kwds):
+        self._pairs = pairs
+
+    @_plot_func
+    def plot(self, **kwds):
+        self.tf = tsa = transfer_function(self._pairs, **kwds)
+        if len(tsa) >= 2:
+            for sa in tsa[1:]:
+                self.ax.plot(tsa[0], sa)
+        self.ax.set_xlabel(f"Period, (sec.)")
+        chn1 = self._pairs[0]["channel"]
+        chn2 = self._pairs[1]["channel"]
+        self.ax.set_title(f"Transfer function (Chn. {chn1} vs. {chn2})")
 
 
 def transfer_function(pairs, *args, **kwds):
-    s1,s2 = spectrum(pairs[0], **kwds), spectrum(pairs[1], **kwds)
+    s1,s2 = Spectrum(pairs[0], **kwds).spect(), Spectrum(pairs[1], **kwds).spect()
     t = s2/s1
     t[0,:] = s1[0,:]
     return t

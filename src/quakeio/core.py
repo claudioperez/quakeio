@@ -28,6 +28,12 @@ class QuakeCollection(dict):
         #return {k: v.serialize(**kwds) for k, v in self.items()}
         return {"motions": [i.serialize(**kwds) for i in self.motions.values()]}
 
+    @property
+    def components(self):
+        return {k:v for m in self.motions.values() 
+                    for k,v in m.components.items()
+        }
+
     def match(self, **kwds):
         pass
 
@@ -145,7 +151,7 @@ class QuakeMotion(dict):
                     getattr(self.components[dirn],typ) ** 2
                     for dirn in self.directions 
                         if dirn in self.components and self.components[dirn]
-                )
+                ).sqrt()
             except AttributeError as e:
                 raise e
         return QuakeComponent(*series.values())
@@ -155,12 +161,16 @@ class QuakeComponent(dict):
     schema_dir = Path(__file__).parents[2] / "etc/schemas"
     schema_file = schema_dir / "component.schema.json"
 
-    def __init__(self, accel, veloc, displ, record=None, meta=None):
+    def __init__(self, accel, veloc, displ, motion=None, meta=None):
         meta = meta if meta is not None else {}
         self.accel = accel
         self.displ = displ
         self.veloc = veloc
-        self._record = record
+        self._parent = motion
+
+        for series in [accel, veloc, displ]:
+            series._parent = self
+
         dict.__init__(self, **meta)
 
     def __repr__(self):
@@ -194,6 +204,8 @@ class QuakeComponent(dict):
                 }
             )
         return ret
+
+
 
     def __sub__(self, other):
         ret = copy(self)
@@ -249,6 +261,12 @@ class QuakeSeries(dict):
         self._data = np.asarray(input_array)
         assert len(self.data.shape) == 1
         self.update(meta if meta is not None else {})
+
+    def __getitem__(self, key):
+        try:
+            return dict.__getitem__(self,key)
+        except KeyError:
+            return self._parent[key]
 
     def _refresh(self):
         self["peak_value"] = max(self._data, key=abs)
@@ -307,6 +325,13 @@ class QuakeSeries(dict):
             raise TypeError()
         return ret
     
+    @_update_metadata
+    def sqrt(self, inplace=False):
+        ret = copy(self)
+        out = self._data if inplace else None
+        ret._data = np.sqrt(self._data, out=out)
+        return ret
+    
     def __rsub__(self, other):
         return self.__sub__(other)
     
@@ -316,12 +341,18 @@ class QuakeSeries(dict):
     def __rmul__(self, other):
         return self.__mul__(other)
     
-    def plot(self, ax=None, fig=None):
+    def plot(self, ax=None, fig=None, label=None, **kwds):
         import matplotlib.pyplot as plt
 
         if ax is None:
             fig, ax = plt.subplots()
-        ax.plot(self.data)
+        if label in self:
+            label=self[label]
+        if label is not None:
+            kwds["label"] = label
+        ax.plot(self.data, **kwds)
+        ax.set_ylabel(f"({self['units']})")
+        ax.set_xlabel("time (sec.)")
 
 
 
