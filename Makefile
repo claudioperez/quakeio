@@ -33,6 +33,7 @@ web: FORCE
 docs: web FORCE
 
 publish:
+	pip uninstall $(PACKAGE)
 	$(PYTHON) setup.py clean --all sdist bdist_wheel
 	twine upload --verbose --skip-existing dist/*
 	git tag -a $(VERSION) -m 'version $(VERSION)'

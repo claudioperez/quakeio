@@ -108,6 +108,8 @@ class Spectrum:
         if len(tsa) > 2:
             for sa in tsa[1:]:
                 self.ax.plot(tsa[0], sa)
+        else:
+            self.ax.plot(tsa[0],tsa[1])
         self.ax.set_xlabel(f"Period, (sec.)")
         chn = self._accel["channel"]
         self.ax.set_title(f"Response spectrum (Chn. {chn})")
