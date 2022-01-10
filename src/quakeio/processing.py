@@ -1,17 +1,23 @@
+import numpy as np
+from numpy import pi
+from quakeio.core import QuakeComponent, QuakeSeries
+
 try:
     import jax.numpy as jnp
 except:
     import numpy as jnp
 
-import numpy as np
-from numpy import pi
-from quakeio.core import QuakeComponent, QuakeSeries
 
+from pathlib import Path
 import matplotlib.pyplot as plt
 try:
-    plt.style.use(["brace2"])
-    plt.plot([0.0, 1.0], [0.0, 0.1], label=r"$\sigma")
-except:
+    style_file = Path(__file__).parents[0]/"brace2.mplstyle"
+    plt.style.use([style_file])
+    import tempfile
+    with tempfile.NamedTemporaryFile() as tf:
+        plt.plot([0.0, 1.0], [0.0, 0.1], label=r"$\sigma")
+        plt.savefig(tf.name)
+except RuntimeError as e:
     import matplotlib
     matplotlib.rcParams.update({
         "text.usetex": False,
