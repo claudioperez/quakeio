@@ -66,6 +66,7 @@ class AssetMap:
         ).add_to(self.map)
  
         #return {"content": m.get_root().render()}
-        return {"content": m._repr_html_()}
+        #return {"content": m._repr_html_()}
+        return {"content": self.map._repr_html_()}
 
 
