@@ -1,7 +1,7 @@
 {
     "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/filters/items/anyOf/0",
     "type": "object",
-    "title": "QuakeFilter Schema",
+    "title": "QuakeFilter",
     "default": {},
     "required": ["filter_type"],
     "properties": {

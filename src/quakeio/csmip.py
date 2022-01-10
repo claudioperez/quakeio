@@ -259,8 +259,8 @@ def read_record_v2(
             series_data[typ].update({k: val})
 
     record_data["file_name"] = filename.name
-    record_data["ihdr"] = int_header
-    record_data["rhdr"] = real_header
+    #record_data["ihdr"] = list(int_header)
+    #record_data["rhdr"] = list(real_header)
     return QuakeComponent(
         QuakeSeries(accel, series_data["accel"]),
         QuakeSeries(veloc, series_data["veloc"]),

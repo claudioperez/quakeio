@@ -5,10 +5,22 @@ except:
 
 import numpy as np
 from numpy import pi
-import matplotlib.pyplot as plt
 from quakeio.core import QuakeComponent, QuakeSeries
 
-#COLORS = plt.rcParams['axes.prop_cycle'].by_key()['color']
+import matplotlib.pyplot as plt
+try:
+    plt.style.use(["brace2"])
+    plt.plot([0.0, 1.0], [0.0, 0.1], label=r"$\sigma")
+except:
+    import matplotlib
+    matplotlib.rcParams.update({
+        "text.usetex": False,
+        "text.latex.preamble": ""
+    })
+finally:
+    plt.close()
+
+
 
 def plot_grid(series, label=None):
     fig, ax = plt.subplots(len(series),1,sharex=True)
@@ -24,7 +36,6 @@ def plot_grid(series, label=None):
 
 
 def _plot_func(plot):
-    plt.style.use("typewriter")
 
     def __call__(self, *args, **kwds):
         if "ax" in kwds:

@@ -1,7 +1,7 @@
 {
   "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc",
   "type": "object",
-  "title": "The veloc schema",
+  "title": "QuakeSeries",
   "default": {},
   "required": [
       "units",
@@ -11,39 +11,39 @@
   "additionalProperties": true,
   "properties": {
       "peak_value": {
-          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/peak_value",
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/peak_value",
           "type": "number",
-          "title": "The peak_value schema",
+          "title": "Peak value",
           "default": 0.0
       },
       "units": {
-          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/units",
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/units",
           "type": "string",
-          "title": "The units schema"
+          "title": "Series units"
       },
       "peak_time": {
-          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/peak_time",
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/peak_time",
           "type": "number",
-          "title": "The peak_time schema"
+          "title": "Time of peak value"
       },
       "shape": {
-          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/shape",
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/shape",
           "type": "integer",
-          "title": "The shape schema"
+          "title": "Serise shape"
       },
       "time_step": {
-          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/time_step",
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/time_step",
           "type": "number",
-          "title": "The time_step schema"
+          "title": "Time step"
       },
       "data": {
-          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/data",
+          "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/data",
           "type": "array",
-          "title": "The data schema",
+          "title": "Time series data",
           "default": [],
           "additionalItems": true,
           "items": {
-              "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc/properties/data/items"
+              "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/data/items"
           }
       }
   }
