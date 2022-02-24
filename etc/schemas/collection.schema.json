@@ -1,37 +1,35 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema",
-	"$id": "http://example.com/example.json",
-	"type": "object",
-	"title": "QuakeCollection",
-	"required": [
-		"motions"
-	],
-	"properties": {
-		"motions": {
-			"$id": "#/properties/motions",
-			"type": "array",
-			"title": "The motions schema",
-			"items": {
-				"$id": "#/properties/motions/items",
-				"type": "object",
-				"title": "QuakeMotion",
-				"required": ["key","components"],
-				"properties": {
-					"key": {
-						"$id": "#/properties/motions/items/anyOf/0/properties/key",
-						"type": "string"
-					},
-					"components": {
-						"$id": "#/properties/motions/items/anyOf/0/properties/components",
-						"type": "array",
-						"title": "QuakeMotion Components",
-						"additionalItems": true,
-						"items": {"$ref": "component.schema.json"}
-					}
-				},
-				"additionalProperties": true
-			}
-		}
-	},
-	"additionalProperties": true
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "title": "QuakeCollection",
+  "required": ["motions"],
+  "properties": {
+    "motions": {
+      "$id": "#/properties/motions",
+      "type": "array",
+      "title": "The motions schema",
+      "items": {
+        "$id": "#/properties/motions/items",
+        "type": "object",
+        "title": "QuakeMotion",
+        "required": ["key","components"],
+        "properties": {
+          "key": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/key",
+            "type": "string"
+          },
+          "components": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components",
+            "type": "array",
+            "title": "QuakeMotion component map",
+            "additionalItems": true,
+            "items": {"$ref": "component.schema.json"}
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
 }
