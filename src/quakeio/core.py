@@ -51,8 +51,8 @@ class QuakeCollection(dict):
 
         if t[0] == "l":
             return self.at(*args, **kwds)
-        if t[0] == "r":
-            test = lambda x, y: re.match(x, y)
+        # if t[0] == "r":
+        #     test = lambda x, y: re.match(x, y)
         elif t == ">":
             test = lambda x, y: x > y
         elif t == "<":
