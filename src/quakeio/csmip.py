@@ -285,9 +285,14 @@ def read_record_v2(
         # extract information about shape of data
         s = next(f)
         s = s if isinstance(s, str) else s.decode("utf-8")
-        data_fmt = re.match(r"^ *([0-9]*) *.* \(8f(.*)\)", s)
-        len_accel = int(data_fmt.group(1))
-        field_width = int(data_fmt.group(2).split(".")[0])
+        len_accel = int(re.match("^ *([0-9]*) *.*", s).group(1))
+        
+        # extract format specifier, eg "(8f9.6)" if provided
+        data_fmt = re.match(r"\(8f(.*)\)", s)
+        if data_fmt:
+            field_width = int(data_fmt.group(1).split(".")[0])
+        else:
+            field_width = 9 if v1 else 10
 
         parse_options = dict(
             delimiter = field_width,  # fields are 10 chars wide
