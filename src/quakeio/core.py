@@ -40,13 +40,35 @@ class QuakeCollection(dict):
             for v in m.components.values():
                 yield v
 
-
-    def match(self, **kwds):
+    def filter(self, t, *args, **kwds):
         pass
 
-    def at(self,**kwds):
+    def match(self, t, *args, **kwds):
+        if callable(t):
+            pass
+
+        assert type(t) == str
+
+        if t[0] == "l":
+            return self.at(*args, **kwds)
+        if t[0] == "r":
+            test = lambda x, y: re.match(x, y)
+        elif t == ">":
+            test = lambda x, y: x > y
+        elif t == "<":
+            test = lambda x, y: x < y
+
+        return self.at(*args, **kwds)
+
+    def at(self, rtol=1e-05, atol=1e-08, **kwds):
         for motion in self.motions.values():
-            if all(k in motion and motion[k] == v for k, v in kwds.items()):
+            tests = (
+              k in motion and (
+                np.isclose(motion[k],v, rtol=rtol, atol=atol) if isinstance(v,float)\
+                        else (motion[k] == v)
+              ) for k, v in kwds.items()
+            )
+            if all(tests):
                 return motion
 
         return self.get_component(**kwds)
@@ -171,6 +193,7 @@ class QuakeMotion(dict):
 
 
 class QuakeComponent(dict):
+    """A container of QuakeSeries objects"""
     schema_dir = Path(__file__).parents[2] / "etc/schemas"
     schema_file = schema_dir / "component.schema.json"
 
@@ -185,10 +208,14 @@ class QuakeComponent(dict):
             series._parent = self
 
         dict.__init__(self, **meta)
+    @property
+    def series(self):
+        for s in "accel","veloc","displ":
+            yield getattr(self,s)
 
     def __repr__(self):
         return f"QuakeComponent({self['file_name']}) at {hex(id(self))}"
-    
+
     def slice(self, *args):
         for s in "accel","veloc","displ":
             getattr(self,s).slice(*args)
@@ -256,10 +283,10 @@ class QuakeComponent(dict):
             for k in ["accel", "veloc", "displ"]:
                 setattr(ret, k,  other * getattr(self, k))
         return ret
-    
+
     def __rsub__(self, other):
         return self.__sub__(other)
-    
+
     def __radd__(self, other):
         return self.__add__(other)
 

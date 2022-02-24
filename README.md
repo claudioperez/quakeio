@@ -51,7 +51,7 @@ pip install quakeio
 [pypi-v-link]: https://pypi.org/project/quakeio
 [build-img]: https://github.com/claudioperez/quakeio/actions/workflows/base.yml/badge.svg
 [cov-img]: https://raw.githubusercontent.com/claudioperez/quakeio/master/etc/coverage/cov.svg
-[gh-link]: https://github.com/claudioperez/quakeio/compare/v0.1.7...master
-[gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/v0.1.7?style=social
+[gh-link]: https://github.com/claudioperez/quakeio/compare/v0.1.8...master
+[gh-image]: https://img.shields.io/github/commits-since/claudioperez/quakeio/v0.1.8?style=social
 
 

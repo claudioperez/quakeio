@@ -7,6 +7,7 @@ import re
 import sys
 import fnmatch
 import zipfile
+from datetime import datetime
 from pathlib import Path
 from collections import defaultdict
 
@@ -20,6 +21,7 @@ from .core import (
     QuakeSeries,
     # RealNumber
 )
+
 from .utils.parseutils import (
     parse_sequential_fields,
     open_quake,
@@ -37,10 +39,24 @@ INTEGER_HEADER_START_LINE = 25
 INTEGER_HEADER_END_LINE = 25+7
 REAL_HEADER_END_LINE = 45
 
+
+DATEFMT = "%m/%d/%y, %H:%M" #:%S.%f %Z"
 to_key = lambda strng: strng.strip().replace(" ", "_").lower()
 
 words = lambda x: CRE_WHITE.sub(" ", str(x)).strip()
 units = lambda x: str(x).strip().lower()
+
+class FindDate:
+    pat1  = re.compile(r"([A-z]* of )? ([A-z]{,5} [A-z]{,5} [0-9]{,2}, [0-9]{4} [0-9]{2}:[0-9]{2}:"+RE_DECIMAL+" [A-Z]{,4})")
+    def findall(self, line):
+        if line[0].upper() == "R":
+            return FindDate.pat1.findall(line)
+        else:
+            print(line)
+            match = FindDate.pat2.findall(line)
+            print(match)
+            return (["", *match[0]],)
+
 
 # fmt: off
 # Dict[
@@ -54,6 +70,12 @@ HEADER_FIELDS = {
     ("_", "record.record_identifier"): ((str, str),
         re.compile(r"([A-z ]*) ([A-z0-9\-\.]*)", re.IGNORECASE)
     ),
+    # line 5
+    ("_", "record.date"): ((str,lambda s: datetime.strptime(s.strip(),DATEFMT).isoformat(),),
+        #(5,
+            re.compile(r"(.*): *([0-9]{,2}/[0-9]{,2}/[0-9]{,4}, *[0-9]{2}:[0-9]{2})")#[:.0-9]{,4} [A-Z]{,4})")
+        #)
+    ),
     # line 6
     ("record.station.no", "record.station.coord"): ((str, str),
         re.compile(
@@ -61,10 +83,17 @@ HEADER_FIELDS = {
             re.IGNORECASE
         )
     ),
+    # line 7
+    ("record.station_name",): ((words, ),
+        ( 7,  (slice(40), ) )
+    #("record.station_name", "_"): ((str, str),
+            #re.compile("(.*) *(CGS)", re.IGNORECASE) 
+        # )
+    ),
     # line 8
-    ("record.channel", "record.component", "_", "record.station.channel", "record.location_name"): (
+    ("record.channel", "record.component", "_", "record.station_channel", "record.location_name"): (
         (str, str, maybe_t("(Deg)",str), maybe_t("Sta Chn: ([0-9]*)", words), words),
-        re.compile(
+        re.compile(# (  1   )   (---------)  (---)   (--)             (------)
             rf"Chan *([0-9]*): *([A-z0-9]*) *(Deg)? *(.*) *Location: *([ -~]*)\s",
             re.IGNORECASE
         )
@@ -78,8 +107,8 @@ HEADER_FIELDS = {
     ),
     # line 15
     (
-        "filter.bandpass.point", 
-        "filter.bandpass.point.units", 
+        "filter.bandpass.point",
+        "filter.bandpass.point.units",
         "filter.bandpass.limit_low",
         "filter.bandpass.limit_high",
         "filter.bandpass.limit.units"
@@ -126,7 +155,14 @@ HEADER_FIELDS = {
 }
 # fmt: on
 
-def read_event(read_file, verbosity=0, **kwds):
+V1_HEADER_FIELDS = HEADER_FIELDS.copy()
+V1_HEADER_FIELDS.update({
+    ("record.station_name",): ((words, ),
+        ( 6,  (slice(40),) )
+    )
+})
+
+def read_event(read_file, verbosity=0, summarize=False, **kwds):
     """
     Take the name of a CSMIP zip file and extract record data for the event.
     """
@@ -135,48 +171,81 @@ def read_event(read_file, verbosity=0, **kwds):
     components = []
     motions = defaultdict(QuakeMotion)
     for file in archive.namelist():
-        if file.endswith(".v2") or file.endswith(".V2"):
+        if verbosity > 2: print(f"\t\t{file}")
+        if file.endswith((".v2", ".V2", ".v1", ".V1")):
+            v1 = True if file.endswith((".v1", ".V1")) else False
             if verbosity:
                 print(file, file=sys.stderr)
-            cmp = read_record_v2(file, archive, verbosity=verbosity, **kwds)
-            loc = to_key(cmp["location_name"])
-            drn = to_key(cmp["component"])
+            cmp = read_record_v2(file, archive, verbosity=verbosity, summarize=summarize, v1=v1, **kwds)
+            loc = to_key(cmp.get("location_name", str(file)))
+            drn = to_key(cmp.get("component", "NA"))
             if drn in motions[loc].components:
                 loc += "_alt"
             motions[loc]["key"] = loc
             motions[loc].components[drn] = cmp
-    metadata = {}
-    return QuakeCollection(motions, **metadata)
 
+
+    first_motion = list(motions.values())[0]
+    first_component = list(first_motion.components.values())[0]
+    date = first_component["date"]
+    if v1 and not summarize:
+        peak_accel = max(
+            (max(c.accel.data, key=abs) for m in motions.values() for c in m.components.values()), 
+            key=abs
+        )
+    else:
+        peak_accel = max(
+            (c.accel.get("peak_value", 0) for m in motions.values() for c in m.components.values()), 
+            key=abs
+        )
+    metadata = {
+        "file_name": str(read_file),
+        "peak_accel": peak_accel, 
+        "event_date": date,
+        "station_name": first_component.get("station_name", "NA")
+    }
+    return QuakeCollection(dict(motions), event_date=date, meta=metadata)
+
+
+
+V1_EXCLUDE = ("filter*", "*peak*", "*init*", "*disp*", "*velo*")
 
 def read_record_v2(
-    read_file, archive: zipfile.ZipFile = None, 
+    read_file, 
+    archive: zipfile.ZipFile = None,
     verbosity=0,
     summarize=False,
+    v1 = False,
     exclusions=(),
     **kwds
 ) -> QuakeComponent:
     """
     Read a ground motion record using the CSMIP Volume 2 format
     """
+    if v1:
+        exclusions = V1_EXCLUDE
+        FIELDS = V1_HEADER_FIELDS
+    else:
+        FIELDS = HEADER_FIELDS
     filename = Path(read_file)
     keys = []
     for x in exclusions:
-        for k in HEADER_FIELDS:
+        for k in FIELDS:
             if any(fnmatch.fnmatch(kk,x) for kk in k):
                 keys.append(k)
-    for k in keys:
-        HEADER_FIELDS.pop(k)
+    # for k in keys:
+    #     if k in HEADER_FIELDS:
+    #         if verbosity: print(k)
+    #         HEADER_FIELDS.pop(k)
+    header_fields = {k: v for k,v in FIELDS.items() if k not in keys}
+    #print(list(header_fields.keys()))
+
 
     # Parse header fields
     with open_quake(read_file, "r", archive) as f:
-        header_data = parse_sequential_fields(f, HEADER_FIELDS)
+        header_data = parse_sequential_fields(f, header_fields, verbose=verbosity)
 
     header_data.pop("_")
-
-    parse_options = dict(
-        delimiter=10,  # fields are 10 chars wide
-    )
     # Reopen and parse out data; Note, only the first call
     # provides a skip_header argument as successive reads
     # pick up where the previous left off.
@@ -185,7 +254,7 @@ def read_record_v2(
         int_header = np.genfromtxt(
             f,
             dtype=int,
-            skip_header=25,
+            skip_header=13 if v1 else 25,
             max_rows=6,
             delimiter=5,
             ).flatten()
@@ -196,42 +265,63 @@ def read_record_v2(
             delimiter=5,
             ).flatten()
         )
-        assert len(int_header) == 100
+        assert len(int_header) == 100, int_header[:5]
 
         # 100 floating point values on lines 33-45
         real_header = np.genfromtxt(
             f,
-            max_rows=45-33,
+            max_rows= 27-21 if v1 else 45-33,
             delimiter=10,
-            ).flatten()
+        ).flatten()
         real_header = np.append(real_header , np.genfromtxt(
             f,
             max_rows=1,
             delimiter=10,
             ).flatten()
         )
-        assert len(real_header) == 100
+        assert len(real_header) == (50 if v1 else 100)
         num_header = _process_numeric_headers_v2(int_header, real_header, header_data)
+
+        # extract information about shape of data
+        s = next(f)
+        s = s if isinstance(s, str) else s.decode("utf-8")
+        data_fmt = re.match(r"^ *([0-9]*) *.* \(8f(.*)\)", s)
+        len_accel = int(data_fmt.group(1))
+        field_width = int(data_fmt.group(2).split(".")[0])
+
+        parse_options = dict(
+            delimiter = field_width,  # fields are 10 chars wide
+            dtype=float,
+        )
+
 
         if not summarize:
             accel = np.genfromtxt(
                 f,
                 # skip_header=HEADER_END_LINE + 1,
-                skip_header=1,
-                max_rows=np.ceil(header_data["accel.shape"]/NUM_COLUMNS) - 1,
+                #skip_header=1,
+                max_rows=np.ceil(len_accel/NUM_COLUMNS) - 1,
                 **parse_options,
             ).flatten()
             accel = np.append(accel, np.genfromtxt(f,max_rows=1,**parse_options))
-            next(f)
-            veloc = np.genfromtxt(
-                f, max_rows=np.ceil(header_data["veloc.shape"]/NUM_COLUMNS)-1, **parse_options
-            ).flatten()
-            veloc = np.append(veloc, np.genfromtxt(f,max_rows=1,**parse_options))
-            next(f)
-            displ = np.genfromtxt(
-                f, max_rows=np.ceil(header_data["displ.shape"]/NUM_COLUMNS)-1, **parse_options
-            ).flatten()
-            displ = np.append(displ, np.genfromtxt(f,max_rows=1,**parse_options))
+            if not v1:
+                s = next(f)
+                s = s if isinstance(s, str) else s.decode("utf-8")
+                len_veloc = int(re.match("^ *([0-9]*)", s).group(0))
+                veloc = np.genfromtxt(
+                    f, max_rows=np.ceil(len_veloc/NUM_COLUMNS)-1, **parse_options
+                ).flatten()
+                veloc = np.append(veloc, np.genfromtxt(f,max_rows=1,**parse_options))
+
+                s = next(f)
+                s = s if isinstance(s, str) else s.decode("utf-8")
+                len_displ = int(re.match("^ *([0-9]*)", s).group(0))
+                displ = np.genfromtxt(
+                    f, max_rows=np.ceil(len_displ/NUM_COLUMNS)-1, **parse_options
+                ).flatten()
+                displ = np.append(displ, np.genfromtxt(f,max_rows=1,**parse_options))
+            else:
+                veloc, displ = [], []
         else:
             accel, veloc, displ = [], [], []
 
@@ -240,8 +330,8 @@ def read_record_v2(
         filter_data = {
             key[16:]: header_data.pop(key)
             for key in [
-              "filter.bandpass.point", 
-              "filter.bandpass.point.units", 
+              "filter.bandpass.point",
+              "filter.bandpass.point.units",
               "filter.bandpass.limit_low",
               "filter.bandpass.limit_high",
               "filter.bandpass.limit.units"
@@ -259,6 +349,14 @@ def read_record_v2(
             series_data[typ].update({k: val})
 
     record_data["file_name"] = filename.name
+    try:
+        record_data.update({
+            "peak_displ": series_data["displ"]["peak_value"],
+            "peak_veloc": series_data["veloc"]["peak_value"],
+            "peak_accel": series_data["accel"]["peak_value"]
+        })
+    except:
+        pass
     #record_data["ihdr"] = list(int_header)
     #record_data["rhdr"] = list(real_header)
     return QuakeComponent(
@@ -280,9 +378,9 @@ def _process_numeric_headers_v2(ihdr, rhdr, txthdr):
 
 
 FILE_TYPES = {
-    "csmip.v1": {"type": QuakeComponent, "read": read_record_v2},
-    "csmip.v2": {"type": QuakeComponent, "read": read_record_v2},
-    "csmip.v3": {"type": QuakeComponent, "read": read_record_v2, "spec": ""},
+    "csmip.v1":  {"type": QuakeComponent, "read": read_record_v2},
+    "csmip.v2":  {"type": QuakeComponent, "read": read_record_v2},
+    "csmip.v3":  {"type": QuakeComponent, "read": read_record_v2, "spec": ""},
     "csmip.zip": {"type": QuakeCollection, "read": read_event},
 }
 
@@ -294,7 +392,5 @@ def read_record(read_file, *args):
 
 
 def read(read_file, input_format=None):
-    # file_type = get_file_type(file,file_type,"csmip")
-    # if isinstance(
     pass
 

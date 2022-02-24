@@ -26,25 +26,28 @@ def build_parser():
     )
 
     parser.add_argument("read_file", metavar="FILE", nargs="?", default="-")
-    parser.add_argument(
-            "-o", 
-            dest="write_file", 
-            default="-",
-            help="Specify an output file."
-    )
-    parser.add_argument(
-            "--human",
-            default=False,
-            action="store_true",
-            help="Use human friendly field names."
-    )
     #parser.add_argument("-c", dest="command", action="append")
+    #parser.add_argument("validate", action="store_true", default=False
+    #)
     parser.add_argument(
         "-f",
         dest="input_format",
         metavar="FORMAT",
         help="Specify input file format",
         choices=list(quakeio.FILE_TYPES.keys()),
+    )
+    parser.add_argument(
+        "-t", "--to",
+        dest="write_format",
+        metavar="FORMAT",
+        help="Specify output file format",
+        default="json",
+    )
+    parser.add_argument(
+            "--human",
+            default=False,
+            action="store_true",
+            help="Use human friendly field names."
     )
     parser.add_argument(
         "-x",
@@ -56,11 +59,10 @@ def build_parser():
         default=[]
     )
     parser.add_argument(
-        "-t", "--to",
-        dest="write_format",
-        metavar="FORMAT",
-        help="Specify output file format",
-        default="json",
+            "-o",
+            dest="write_file",
+            default="-",
+            help="Specify an output file."
     )
     parser.add_argument(
         "-r",
@@ -84,8 +86,10 @@ def build_parser():
     return parser
 
 
-def cli(*args, write_file="-", human=False, version=False, command=None, **kwds):
+def cli(*args, write_file="-", human=False, validate=False, version=False, command=None, **kwds):
     motion = quakeio.read(**kwds)
+    if validate:
+        run_validation(motion)
     if human:
         motion = quakeio.core.write_pretty(motion)
     if "angle" in kwds and kwds["angle"]:
@@ -94,6 +98,12 @@ def cli(*args, write_file="-", human=False, version=False, command=None, **kwds)
     quakeio.write(write_file, motion, **kwds)
     print("\n")
 
+def run_validation(collection):
+    for motion in collection.motions:
+        for component in motion.components:
+            for series in component.series:
+                pass
+    pass
 
 def list_args(*args):
     args = build_parser().parse_args()
