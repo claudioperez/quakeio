@@ -153,7 +153,7 @@ def spectrum(*args, **kwds):
 def _accel_spectrum(accel,dt,damping,per,gamma=1/2,beta=1/4,interp=None):
     numper = len(per)
     m = 1.0
-    numdata=len(accel)
+    numdata = len(accel)
     t = np.arange(0,(numdata)*dt,dt)
 
     u0,v0 = 0.0, 0.0
@@ -193,12 +193,12 @@ def _accel_spectrum(accel,dt,damping,per,gamma=1/2,beta=1/4,interp=None):
                 deltap = p[j]-p[j-1]
                 deltaph = deltap+acons*v[j-1]+bcons*a[j-1]
                 deltau = deltaph/kstar
-                deltav = gamma*deltau/(beta*dtp)-gamma*v[j-1]/beta+dtp*(1-gamma/(2*beta))*a[j-1]
+                deltav = gamma*deltau/(beta*dtp) - gamma*v[j-1]/beta+dtp*(1-gamma/(2*beta))*a[j-1]
                 deltaa = deltau/(beta*dtp**2)-v[j-1]/(beta*dtp)-a[j-1]/(2*beta)
                 u[j] = u[j-1] + deltau
                 v[j] = v[j-1] + deltav
                 a[j] = a[j-1] + deltaa
-            atot = a+accfrn
+            atot = a + accfrn
             SA[1+di,i] = abs(max(atot, key=abs))
     return SA
 
