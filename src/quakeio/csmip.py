@@ -166,6 +166,7 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
     """
     Take the name of a CSMIP zip file and extract record data for the event.
     """
+
     zippath = Path(read_file)
     archive = zipfile.ZipFile(zippath)
     components = []

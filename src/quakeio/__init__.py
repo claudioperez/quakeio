@@ -29,6 +29,7 @@ def read(read_file, input_format=None, **kwds):
     """
     Generic ground motion reader
     """
+    input_format = input_format or kwds.pop("format",None)
     if input_format is not None:
         typ = input_format
     else:
