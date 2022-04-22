@@ -2,7 +2,6 @@
   "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/veloc",
   "type": "object",
   "title": "QuakeSeries",
-  "default": {},
   "required": [
       "units",
       "shape",
@@ -13,8 +12,7 @@
       "peak_value": {
           "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/peak_value",
           "type": "number",
-          "title": "Peak value",
-          "default": 0.0
+          "title": "Peak value of series data"
       },
       "units": {
           "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/units",
@@ -29,7 +27,7 @@
       "shape": {
           "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/shape",
           "type": "integer",
-          "title": "Serise shape"
+          "title": "Series shape"
       },
       "time_step": {
           "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/series/properties/time_step",

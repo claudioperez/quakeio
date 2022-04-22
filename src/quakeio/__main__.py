@@ -59,6 +59,12 @@ def build_parser():
         default=[]
     )
     parser.add_argument(
+            "-m",
+            dest="match_patterns",
+            action="append",
+            default=[]
+    )
+    parser.add_argument(
             "-o",
             dest="write_file",
             default="-",
@@ -87,7 +93,27 @@ def build_parser():
 
 
 def cli(*args, write_file="-", human=False, validate=False, version=False, command=None, **kwds):
-    motion = quakeio.read(**kwds)
+    read_file = kwds.pop("read_file")
+    if "?" in read_file:
+        from urllib.parse import urlparse
+        url = urlparse(read_file)
+        read_file = url.path
+        query = url.query
+    else:
+        query = None
+
+    motion = quakeio.read(read_file, **kwds)
+
+    if kwds["match_patterns"]:
+        kvs = {}
+        for pat in kwds["match_patterns"]:
+            key, val = pat.split("=")
+            try:
+                key, typ = key.split(":")
+            except:
+                typ = "l"
+            kvs.update({key: val})
+            motion = motion.match(typ, **kvs)
     if validate:
         run_validation(motion)
     if human:
@@ -109,10 +135,13 @@ def list_args(*args):
     args = build_parser().parse_args()
     return cli(**vars(args))
 
-
-def main():
-    args = build_parser().parse_args()
-    cli(**vars(args))
+def main(args=None):
+    args = build_parser().parse_args(args)
+    try:
+        cli(**vars(args))
+    except Exception as e:
+        print(args)
+        raise e
 
 
 if __name__ == "__main__":

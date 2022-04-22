@@ -105,32 +105,25 @@
             "$id": "#/properties/peak_accel.time",
             "type": "number",
             "title": "Time of peak acceleration",
-            "examples": [
-                20.27
-            ]
+            "examples": [20.27]
         },
         "peak_veloc": {
             "$id": "#/properties/peak_veloc",
             "type": "number",
             "title": "Peak velocity",
-            "examples": [
-                0.205
-            ]
+            "examples": [0.205]
         },
         "peak_veloc.units": {
             "$id": "#/properties/peak_veloc.units",
             "type": "string",
             "title": "peak_veloc.units",
             "default": "",
-            "examples": [
-                "cm/sec"
-            ]
+            "examples": ["cm/sec"]
         },
         "peak_veloc.time": {
             "$id": "#/properties/peak_veloc.time",
             "type": "number",
-            "title": "Time of peak velocity",
-            "default": 0.0
+            "title": "Time of peak velocity"
         },
         "peak_displ": {
             "$id": "#/properties/peak_displ",
@@ -172,14 +165,13 @@
             "$id": "#/properties/init_veloc.units",
             "type": "string",
             "title": "init_veloc.units",
-            "description": "Units",
-            "default": "",
+            "description": "Initial velocity units",
             "examples": ["cm/sec"]
         },
         "file_name": {
             "$id": "#/properties/file_name",
             "type": "string",
-            "title": "Source file",
+            "title": "Source file name",
             "default": ""
         }
     },

@@ -6,6 +6,7 @@ from pathlib import Path
 import warnings
 from enum import Enum
 
+#import opensees.units
 import numpy as np
 
 class st(Enum): ACCEL, DISPL, VELOC = range(3)
@@ -26,6 +27,10 @@ class QuakeCollection(dict):
         dict.__init__(self, **meta)
         self.motions = motions
         self.event_date = event_date
+        for motion in motions.values():
+            motion._parent = self
+            for comp in motion.components.values():
+                comp._parent = motion
 
     def __repr__(self):
         return f"QuakeCollection({dict.__repr__(self)})"
@@ -46,8 +51,9 @@ class QuakeCollection(dict):
             for v in m.components.values():
                 yield v
 
-    def filter(self, t, *args, **kwds):
-        pass
+    def convert_units(self, units):
+        for component in self.components:
+            component.convert_units(units)
 
     def match(self, t, *args, **kwds):
         if callable(t):
@@ -57,12 +63,23 @@ class QuakeCollection(dict):
 
         if t[0] == "l":
             return self.at(*args, **kwds)
-        # if t[0] == "r":
-        #     test = lambda x, y: re.match(x, y)
+        if t[0] == "r":
+            import re
+            test = lambda x, y: re.match(x, y)
         elif t == ">":
             test = lambda x, y: x > y
         elif t == "<":
             test = lambda x, y: x < y
+
+        for motion in self.motions.values():
+            tests = (
+              k in motion and test(v, motion[k]) for k, v in kwds.items()
+            )
+            if all(tests):
+                return motion
+            for component in motion.components.values():
+                if all(k in component and test(v,component[k]) for k, v in kwds.items()):
+                    return component
 
         return self.at(*args, **kwds)
 
@@ -106,6 +123,8 @@ class QuakeMotion(dict):
         #for k,v in self.components.items():
         #    setattr(self,k,v)
         self.update(meta if meta is not None else {})
+        for comp in self.components.values():
+            comp._parent = self
 
     @property
     def long(self):
@@ -214,6 +233,7 @@ class QuakeComponent(dict):
             series._parent = self
 
         dict.__init__(self, **meta)
+
     @property
     def series(self):
         for s in "accel","veloc","displ":
@@ -221,6 +241,12 @@ class QuakeComponent(dict):
 
     def __repr__(self):
         return f"QuakeComponent({self['file_name']}) at {hex(id(self))}"
+
+    def find_components(self):
+        loc = self["location_name"]
+        for comp in self._parent.components.values():
+            if comp["location_name"] == loc:
+                yield comp
 
     def slice(self, *args):
         for s in "accel","veloc","displ":
@@ -439,9 +465,15 @@ class QuakeSeries(dict):
 
 
 def rotate(data, angle):
-    output = copy(data)
+    #output = copy(data)
     if isinstance(data, QuakeComponent):
-        raise Exception("Unable to rotate single component")
+        try:
+            data._parent.rotate(angle)
+            #data = QuakeMotion(components={
+            #    i: c for c in data.find_components()
+            #})
+        except Exception as e:
+            raise Exception(f"Unable to rotate single component ({e})")
 
     elif isinstance(data, QuakeCollection):
         for name, record in data.items():
