@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
     "type": "object",
-    "title": "quakeIO Ground Motion Record schema",
+    "title": "QuakeComponent",
     "description": "quakeIO Ground Motion Record schema.",
     "examples": [
         {
@@ -26,7 +26,6 @@
         }
     ],
     "required": [
-        "azimuth",
         "peak_accel",
         "peak_accel.units",
         "peak_accel.time",
@@ -38,17 +37,28 @@
         "peak_displ.time"
     ],
     "properties": {
+        "accel": {"$ref": "series.schema.json"},
+        "veloc": {"$ref": "series.schema.json"},
+        "displ": {"$ref": "series.schema.json"},
+        "ihdr": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/ihdr",
+            "type": "array",
+            "title": "ihdr",
+            "description": "Integer header data",
+            "additionalItems": false,
+            "items": {"type": "integer"}
+        },
+        "rhdr": {
+            "$id": "#/properties/motions/items/anyOf/0/properties/components/items/anyOf/0/properties/rhdr",
+            "type": "array",
+            "title": "rhdr",
+            "items": {"type": "number"}
+        },
         "location": {
             "$id": "#/properties/location",
             "type": "string",
             "title": "Location",
             "description": "Number identifying station at which the data was recorded."
-        },
-        "filter.bandpass.limit_high": {
-            "$id": "#/properties/filter.bandpass.limit_high",
-            "type": "number",
-            "title": "Band-pass filter high cutoff.",
-            "description": "Upper cutoff point for band-pass filter."
         },
         "station_no": {
             "$id": "#/properties/station_no",
@@ -87,10 +97,10 @@
             "default": "",
             "examples": ["cm/sec/sec"]
         },
-	"accel.time_step": {
-	    "type": "number",
-	    "title": "Time step of acceleration data"
-	},
+        "accel.time_step": {
+            "type": "number",
+            "title": "Time step of acceleration data"
+        },
         "peak_accel.time": {
             "$id": "#/properties/peak_accel.time",
             "type": "number",

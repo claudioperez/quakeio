@@ -26,16 +26,20 @@ api:
 	--html --force 
 	mv $(DOCDIR)/$(PACKAGE)/*.html $(DOCDIR)/api/latest/
 	for item in $(DOCDIR)/api/latest/*.html; do mv $$item $${item%.html}.md; done
-web:
-	elstir build
-	/bin/cp -r out/web/* ~/web/quakeio/
-	rm ~/web/ana/*.mako
+
+web: FORCE
+	sphinx-build docs/ web/
+
+docs: web FORCE
 
 publish:
+	pip uninstall $(PACKAGE)
 	$(PYTHON) setup.py clean --all sdist bdist_wheel
 	twine upload --verbose --skip-existing dist/*
 	git tag -a $(VERSION) -m 'version $(VERSION)'
 	git push --tags
 
 .PHONY: api
+
+FORCE:
 

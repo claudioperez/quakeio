@@ -1,4 +1,9 @@
 ## 0.1 
+### 0.1.4
+
+- Add `brace2.mplstyle` to package
+- Minor bug fixes and features in `csmip.py`
+- work on plotting/processing
 
 ### 0.1.3
 

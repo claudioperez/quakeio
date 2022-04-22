@@ -104,10 +104,7 @@ def record2vega(ground_motion, dump_json=True, **kwds):
         }
       ]
     }
-
-
     #ground_motion = ground_motion.serialize(serialize_data=not summarize)
-
     dt = ground_motion.accel.time_step
     output.update({
       "data": [

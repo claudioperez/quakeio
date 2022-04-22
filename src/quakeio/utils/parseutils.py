@@ -50,49 +50,59 @@ def open_quake(file, mode=None, archive=None):
             fh.close()
 
 
-def parse_sequential_fields(data, field_spec: dict, parsed_fields={}) -> dict:
-    """ """
+def parse_sequential_fields(data, field_spec: dict, parsed_fields={}, verbose=False) -> dict:
     field_iterator = iter(field_spec.items())
-    fields, (typs, regex) = next(field_iterator)
-    for line in data:
-        match = regex.findall(str(line))
-        if match:
-            prefix = ""
-            assert len(fields) == len(typs) == len(match[0]), (regex, match[0])
-            for field, typ, val in zip(fields, typs, match[0]):
-                if field[0] == ".":
-                    key = prefix + field
-                else:
-                    prefix = field
-                    key = field
+    fields, (typs, pat) = next(field_iterator)
+    #print(f"\tfields: {fields}")
+    for ln, line in enumerate(data):
+        #if not ln % 100: print(f"\t\tline: {ln}")
+        if hasattr(pat, "findall"):
+            match = pat.findall(str(line))
+            if match:
+                prefix = ""
+                assert len(fields) == len(typs) == len(match[0]), (pat, match[0])
+                for field, typ, val in zip(fields, typs, match[0]):
+                    if field[0] == ".":
+                        key = prefix + field
+                    else:
+                        prefix = field
+                        key = field
 
-                parsed_fields[key] = typ(val)
-            try:
-                fields, (typs, regex) = next(field_iterator)
-            except StopIteration:
-                # All fields have been parsed out
-                break
+                    parsed_fields[key] = typ(val)
+                try:
+                    fields, (typs, pat) = next(field_iterator)
+                    #print(f"\tfields: {fields}")
+                except StopIteration:
+                    # All fields have been parsed out
+                    break
+            else:
+                pass
         else:
-            pass
-    return parsed_fields
+            lnum, line_pat = pat
+            lnum -= 1
+            assert ln <= lnum
+            if ln < lnum: continue
 
+            prefix = ""
+            line_str = str(line)
+            if isinstance(line_pat, tuple):
+                match = ( [line_str[s] for s in line_pat] , )
+            else:
+                match = line_pat.findall(line_str)
+                #assert len(fields) == len(typs) == len(match[0]), (line_pat, match[0])
+            if match:
+                for field, typ, val in zip(fields, typs, match[0]):
+                    if field[0] == ".":
+                        key = prefix + field
+                    else:
+                        prefix = field
+                        key = field
+                    parsed_fields[key] = typ(val)
+            fields, (typs, pat) = next(field_iterator)
 
-def parse_sequential_fields_v0(data, fields, parsed_fields={}):
-    """ """
-    field_iterator = iter(fields.items())
-    field, (keys, typs, regex) = next(field_iterator)
+    if verbose:
+        print(fields)
 
-    for line in data:
-        match = regex.findall(str(line))
-        if match:
-            parsed_fields[field] = {
-                key: typ(val) for key, typ, val in zip(keys, typs, match[0])
-            }
-            try:
-                field, (keys, typs, regex) = next(field_iterator)
-            except StopIteration:
-                # All fields have been parsed out
-                break
     return parsed_fields
 
 
