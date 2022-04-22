@@ -1,5 +1,5 @@
 # Claudio Perez
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 
 from pathlib import Path
 
@@ -36,7 +36,7 @@ def read(read_file, input_format=None, **kwds):
         try:
             typ = DEFAULT_TYPES[Path(read_file).suffix.lower()]
         except KeyError:
-            raise ValueError("Unable to deduce input format")
+            raise ValueError("Unable to deduce input format.\n")
     return FILE_TYPES[typ]["read"](read_file, **kwds)
 
 

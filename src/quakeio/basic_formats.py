@@ -9,6 +9,21 @@ from quakeio.utils.parseutils import open_quake
 class Unused:
     pass
 
+def write_text(write_file, ground_motion, **kwds):
+    import numpy
+    if isinstance(ground_motion, QuakeComponent):
+        dt = ground_motion.accel["time_step"]
+        accel = numpy.asarray(ground_motion.accel.data)[:, None]
+    elif isinstance(ground_motion, QuakeSeries):
+        dt = ground_motion["time_step"]
+        accel = numpy.asarray(ground_motion.data)[:, None]
+    else:
+        raise ValueError(
+            f"Cannot conver motion of type `{type(ground_motion)}` to QuakeComponent"
+        )
+    with open_quake(write_file, "w") as f:
+        numpy.savetxt(f, accel, fmt="%.8f", delimiter="\n")
+
 
 class QuakeEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -65,6 +80,7 @@ def write_yaml(write_file, ground_motion, summarize=False, **kwds):
 
 
 FILE_TYPES = {
+    "txt":  {"write": write_text},
     "json": {"read": read_json, "write": write_json},
     "yaml": {"read": read_yaml, "write": write_yaml},
     "quake.json": {"read": read_json, "write": write_json},

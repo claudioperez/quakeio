@@ -103,6 +103,7 @@ def cli(*args, write_file="-", human=False, validate=False, version=False, comma
         query = None
 
     motion = quakeio.read(read_file, **kwds)
+
     if kwds["match_patterns"]:
         kvs = {}
         for pat in kwds["match_patterns"]:
@@ -136,7 +137,11 @@ def list_args(*args):
 
 def main(args=None):
     args = build_parser().parse_args(args)
-    cli(**vars(args))
+    try:
+        cli(**vars(args))
+    except Exception as e:
+        print(args)
+        raise e
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from pathlib import Path
 import warnings
 from enum import Enum
 
+#import opensees.units
 import numpy as np
 
 class st(Enum): ACCEL, DISPL, VELOC = range(3)
@@ -44,8 +45,9 @@ class QuakeCollection(dict):
             for v in m.components.values():
                 yield v
 
-    def filter(self, t, *args, **kwds):
-        pass
+    def convert_units(self, units):
+        for component in self.components:
+            component.convert_units(units)
 
     def match(self, t, *args, **kwds):
         if callable(t):
