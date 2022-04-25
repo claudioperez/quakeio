@@ -24,7 +24,11 @@ class QuakeCollection(dict):
 
     def __init__(self, motions, event_date=None, meta=None, **kwds):
         meta = meta if meta is not None else {}
+        # TODO: probably overload __getitem__ instead of
+        # storing twice
         dict.__init__(self, **meta)
+        self.metadata = meta
+
         self.motions = motions
         self.event_date = event_date
         for motion in motions.values():
@@ -43,7 +47,10 @@ class QuakeCollection(dict):
 
     def serialize(self, serialize_data=True, **kwds) -> dict:
         #return {k: v.serialize(**kwds) for k, v in self.items()}
-        return {"motions": [i.serialize(**kwds) for i in self.motions.values()]}
+        return {
+                "motions": [i.serialize(**kwds) for i in self.motions.values()],
+                **self.metadata
+        }
 
     @property
     def components(self):
@@ -447,6 +454,8 @@ class QuakeSeries(dict):
         return self
     
     def plot(self, ax=None, fig=None, label=None, index=(None,),**kwds):
+        # matplotlib takes a very long time to import; avoid
+        # loading at module level.
         import matplotlib.pyplot as plt
         idx = slice(*index)
         time = self.time

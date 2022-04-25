@@ -1,4 +1,9 @@
 ## 0.1 
+### 0.1.12
+- add metadata to serialization of `QuakeCollection`
+
+### 0.1.11
+
 ### 0.1.4
 
 - Add `brace2.mplstyle` to package
