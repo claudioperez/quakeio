@@ -108,20 +108,20 @@ HEADER_FIELDS = {
             re.IGNORECASE
         )
     ),
-    # line 15
-    (
-        "filter.bandpass.point",
-        "filter.bandpass.point.units",
-        "filter.bandpass.limit_low",
-        "filter.bandpass.limit_high",
-        "filter.bandpass.limit.units"
-    ) : (
-        (float, units, float, float, units),
-        re.compile(
-            rf"Accelerogram bandpass filtered with *({RE_DECIMAL}) *({RE_UNITS}) pts at *({RE_DECIMAL}) and *({RE_DECIMAL}) *({RE_UNITS})\s",
-            re.IGNORECASE
-        )
-    ),
+    #    # line 15
+    #    (
+    #        "filter.bandpass.point",
+    #        "filter.bandpass.point.units",
+    #        "filter.bandpass.limit_low",
+    #        "filter.bandpass.limit_high",
+    #        "filter.bandpass.limit.units"
+    #    ) : (
+    #        (float, units, float, float, units),
+    #        re.compile(
+    #            rf"Accelerogram bandpass filtered with *({RE_DECIMAL}) *({RE_UNITS}) pts at *({RE_DECIMAL}) and *({RE_DECIMAL}) *({RE_UNITS})\s",
+    #            re.IGNORECASE
+    #        )
+    #    ),
     ("accel.peak_value", "accel.units", "accel.peak_time"): ((float, units, float),
         re.compile(
             rf"Peak *acceleration *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})",

@@ -440,7 +440,7 @@ class QuakeSeries(dict):
         self._data = self.data[idx]
         return self
     
-    def plot(self, ax=None, fig=None, label=None, index=(None,),**kwds):
+    def plot(self, ax=None, fig=None, label=None, index=(None,), scale=1.0, **kwds):
         import matplotlib.pyplot as plt
         idx = slice(*index)
         time = self.time
@@ -451,7 +451,7 @@ class QuakeSeries(dict):
             label=self[label]
         if label is not None:
             kwds["label"] = label
-        ax.plot(time[idx],self.data[idx], **kwds)
+        ax.plot(time[idx],self.data[idx]*scale, **kwds)
         ax.set_ylabel(f"({self['units']})")
         ax.set_xlabel("time (sec.)")
         return ax
