@@ -1,37 +1,3 @@
-/* ****************************************************************** **
-**    OpenSees - Open System for Earthquake Engineering Simulation    **
-**          Pacific Earthquake Engineering Research Center            **
-**                                                                    **
-**                                                                    **
-** (C) Copyright 1999, The Regents of the University of California    **
-** All Rights Reserved.                                               **
-**                                                                    **
-** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
-** file 'COPYRIGHT'  in main directory for information on usage and   **
-** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
-**                                                                    **
-** Developed by:                                                      **
-**   Frank McKenna (fmckenna@ce.berkeley.edu)                         **
-**   Gregory L. Fenves (fenves@ce.berkeley.edu)                       **
-**   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
-**                                                                    **
-** ****************************************************************** */
-                                                                        
-// $Revision: 1.8 $
-// $Date: 2010-02-16 18:57:35 $
-// $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerMotion.cpp,v $                                                                        
-// Written: fmk 
-// Created: 10/06
-//
-// Purpose: This file contains the class definition for PeerMotion.
-// PeerMotion is a concrete class. A PeerMotion object provides
-// a linear time series. the factor is given by the pseudoTime and 
-// a constant factor provided in the constructor. 
-//
-// What: "@(#) PeerMotion.C, revA"
-
-
 #include <PeerMotion.h>
 #include <Vector.h>
 #include <Channel.h>
@@ -44,8 +10,6 @@ using std::ifstream;
 
 #include <iomanip>
 using std::ios;
-
-//#include <Socket.h>
 
 #ifdef _WIN32
 int __cdecl
