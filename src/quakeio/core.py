@@ -65,15 +65,33 @@ class QuakeCollection(dict):
         elif t == "<":
             test = lambda x, y: x < y
 
-        for motion in self.motions.values():
-            tests = (
-              k in motion and test(v, motion[k]) for k, v in kwds.items()
-            )
-            if all(tests):
-                return motion
-            for component in motion.components.values():
-                if all(k in component and test(v,component[k]) for k, v in kwds.items()):
-                    return component
+        if len(t) > 1:
+            typ = "multi"
+        else:
+            typ = "single"
+
+        if typ=="single":
+            for motion in self.motions.values():
+                tests = (
+                  k in motion and test(v, motion[k]) for k, v in kwds.items()
+                )
+                if all(tests):
+                    return motion
+                for component in motion.components.values():
+                    if all(k in component and test(v,component[k]) for k, v in kwds.items()):
+                        return component
+        elif typ=="multi":
+            res = []
+            for motion in self.motions.values():
+                tests = (
+                  k in motion and test(v, motion[k]) for k, v in kwds.items()
+                )
+                if all(tests):
+                    res.append(motion)
+                for component in motion.components.values():
+                    if all(k in component and test(v,component[k]) for k, v in kwds.items()):
+                        res.append(component)
+            return res
 
         return self.at(*args, **kwds)
 
@@ -328,18 +346,26 @@ class QuakeSeries(dict):
             return res
         return wrapped
 
-    def __init__(self, input_array, meta=None, time_zero=0.0):
+    def __init__(self, input_array, dt=None, meta=None, time_zero=0.0, **kwds):
         self._data = np.asarray(input_array)
         assert len(self.data.shape) == 1
         self.update(meta if meta is not None else {})
+        self.update(kwds)
         self._time = None
         self.time_zero = time_zero
+        if dt is not None:
+            self["time_step"] = dt
+        if "peak_value" not in self:
+            self._refresh()
 
     def __getitem__(self, key):
         try:
             return dict.__getitem__(self,key)
-        except KeyError:
-            return self._parent[key]
+        except KeyError as e:
+            if hasattr(self, "_parent"):
+                return self._parent[key]
+            else:
+                raise e
 
     def _refresh(self):
         self["peak_value"] = max(self.data, key=abs)
@@ -350,8 +376,11 @@ class QuakeSeries(dict):
         return self._data
 
     def __repr__(self):
-        filename=hex(id(self))
-        return f"QuakeSeries({filename},{self['units']})" #{dict.__repr__(self)})"
+        try:
+            filename=hex(id(self))
+            return f"QuakeSeries({filename},{self['units']})" #{dict.__repr__(self)})"
+        except:
+            return f"QuakeSeries([{self.data[0]}...{self.data[-1]}])"
     
     def serialize(
         self, key=None, summarize=False, serialize_data=True, humanize_keys=False

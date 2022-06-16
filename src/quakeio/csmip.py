@@ -372,9 +372,9 @@ def read_record_v2(
     #record_data["ihdr"] = list(int_header)
     #record_data["rhdr"] = list(real_header)
     return QuakeComponent(
-        QuakeSeries(accel, series_data["accel"]),
-        QuakeSeries(veloc, series_data["veloc"]),
-        QuakeSeries(displ, series_data["displ"]),
+        QuakeSeries(accel, meta=series_data["accel"]),
+        QuakeSeries(veloc, meta=series_data["veloc"]),
+        QuakeSeries(displ, meta=series_data["displ"]),
         meta=record_data,
     )
 
