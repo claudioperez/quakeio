@@ -191,7 +191,10 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
 
     first_motion = list(motions.values())[0]
     first_component = list(first_motion.components.values())[0]
-    date = first_component["date"]
+    try:
+        date = first_component["date"]
+    except:
+        date = None
     if v1 and not summarize:
         peak_accel = max(
             (max(c.accel.data, key=abs) for m in motions.values() for c in m.components.values()), 
