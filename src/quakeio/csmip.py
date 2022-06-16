@@ -26,10 +26,12 @@ from .utils.parseutils import (
     parse_sequential_fields,
     open_quake,
     RE_DECIMAL,  # Regular expression for extracting decimal values
-    RE_UNITS,  # Regular expression for extracting units
+    RE_UNITS,    # Regular expression for extracting units
     CRE_WHITE,
     maybe_t,
 )
+
+re_digits = re.compile(r"([0-9]+)")
 
 # Module constants
 NUM_COLUMNS = 8
@@ -91,7 +93,8 @@ HEADER_FIELDS = {
         # )
     ),
     # line 8
-    ("record.channel", "record.component", "_", "record.station_channel", "record.location_name"): (
+    # ("record.channel", "record.component", "_", "record.station_channel", "record.location_name"): (
+    ("record.channel", "record.component", "_", "_", "record.location_name"): (
         (str, str, maybe_t("(Deg)",str), maybe_t("Sta Chn: ([0-9]*)", words), words),
         re.compile(# (  1   )   (---------)  (---)   (--)             (------)
             rf"Chan *([0-9]*): *([A-z0-9]*) *(Deg)? *(.*) *Location: *([ -~]*)\s",
@@ -105,20 +108,20 @@ HEADER_FIELDS = {
             re.IGNORECASE
         )
     ),
-    # line 15
-    (
-        "filter.bandpass.point",
-        "filter.bandpass.point.units",
-        "filter.bandpass.limit_low",
-        "filter.bandpass.limit_high",
-        "filter.bandpass.limit.units"
-    ) : (
-        (float, units, float, float, units),
-        re.compile(
-            rf"Accelerogram bandpass filtered with *({RE_DECIMAL}) *({RE_UNITS}) pts at *({RE_DECIMAL}) and *({RE_DECIMAL}) *({RE_UNITS})\s",
-            re.IGNORECASE
-        )
-    ),
+    #    # line 15
+    #    (
+    #        "filter.bandpass.point",
+    #        "filter.bandpass.point.units",
+    #        "filter.bandpass.limit_low",
+    #        "filter.bandpass.limit_high",
+    #        "filter.bandpass.limit.units"
+    #    ) : (
+    #        (float, units, float, float, units),
+    #        re.compile(
+    #            rf"Accelerogram bandpass filtered with *({RE_DECIMAL}) *({RE_UNITS}) pts at *({RE_DECIMAL}) and *({RE_DECIMAL}) *({RE_UNITS})\s",
+    #            re.IGNORECASE
+    #        )
+    #    ),
     ("accel.peak_value", "accel.units", "accel.peak_time"): ((float, units, float),
         re.compile(
             rf"Peak *acceleration *= *({RE_DECIMAL}) *({RE_UNITS}) *at *({RE_DECIMAL})",
@@ -166,6 +169,7 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
     """
     Take the name of a CSMIP zip file and extract record data for the event.
     """
+
     zippath = Path(read_file)
     archive = zipfile.ZipFile(zippath)
     components = []
@@ -285,15 +289,19 @@ def read_record_v2(
         # extract information about shape of data
         s = next(f)
         s = s if isinstance(s, str) else s.decode("utf-8")
-        data_fmt = re.match(r"^ *([0-9]*) *.* \(8f(.*)\)", s)
-        len_accel = int(data_fmt.group(1))
-        field_width = int(data_fmt.group(2).split(".")[0])
+        len_accel = int(re.match("^ *([0-9]*) *.*", s).group(1))
+        
+        # extract format specifier, eg "(8f9.6)" if provided
+        data_fmt = re.match(r"\(8f(.*)\)", s)
+        if data_fmt:
+            field_width = int(data_fmt.group(1).split(".")[0])
+        else:
+            field_width = 9 if v1 else 10
 
         parse_options = dict(
             delimiter = field_width,  # fields are 10 chars wide
             dtype=float,
         )
-
 
         if not summarize:
             accel = np.genfromtxt(
@@ -349,6 +357,7 @@ def read_record_v2(
             series_data[typ].update({k: val})
 
     record_data["file_name"] = filename.name
+    record_data["station_channel"] = str(int(re_digits.search(filename.name.split(".")[0]).group(0)))
     try:
         record_data.update({
             "peak_displ": series_data["displ"]["peak_value"],
@@ -360,9 +369,9 @@ def read_record_v2(
     #record_data["ihdr"] = list(int_header)
     #record_data["rhdr"] = list(real_header)
     return QuakeComponent(
-        QuakeSeries(accel, series_data["accel"]),
-        QuakeSeries(veloc, series_data["veloc"]),
-        QuakeSeries(displ, series_data["displ"]),
+        QuakeSeries(accel, meta=series_data["accel"]),
+        QuakeSeries(veloc, meta=series_data["veloc"]),
+        QuakeSeries(displ, meta=series_data["displ"]),
         meta=record_data,
     )
 

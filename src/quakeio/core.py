@@ -6,6 +6,7 @@ from pathlib import Path
 import warnings
 from enum import Enum
 
+#import opensees.units
 import numpy as np
 
 class st(Enum): ACCEL, DISPL, VELOC = range(3)
@@ -26,6 +27,10 @@ class QuakeCollection(dict):
         dict.__init__(self, **meta)
         self.motions = motions
         self.event_date = event_date
+        for motion in motions.values():
+            motion._parent = self
+            for comp in motion.components.values():
+                comp._parent = motion
 
     def __repr__(self):
         return f"QuakeCollection({dict.__repr__(self)})"
@@ -46,8 +51,9 @@ class QuakeCollection(dict):
             for v in m.components.values():
                 yield v
 
-    def filter(self, t, *args, **kwds):
-        pass
+    def convert_units(self, units):
+        for component in self.components:
+            component.convert_units(units)
 
     def match(self, t, *args, **kwds):
         if callable(t):
@@ -57,12 +63,41 @@ class QuakeCollection(dict):
 
         if t[0] == "l":
             return self.at(*args, **kwds)
-        # if t[0] == "r":
-        #     test = lambda x, y: re.match(x, y)
+        if t[0] == "r":
+            import re
+            test = lambda x, y: re.match(x, y)
         elif t == ">":
             test = lambda x, y: x > y
         elif t == "<":
             test = lambda x, y: x < y
+
+        if len(t) > 1:
+            typ = "multi"
+        else:
+            typ = "single"
+
+        if typ=="single":
+            for motion in self.motions.values():
+                tests = (
+                  k in motion and test(v, motion[k]) for k, v in kwds.items()
+                )
+                if all(tests):
+                    return motion
+                for component in motion.components.values():
+                    if all(k in component and test(v,component[k]) for k, v in kwds.items()):
+                        return component
+        elif typ=="multi":
+            res = []
+            for motion in self.motions.values():
+                tests = (
+                  k in motion and test(v, motion[k]) for k, v in kwds.items()
+                )
+                if all(tests):
+                    res.append(motion)
+                for component in motion.components.values():
+                    if all(k in component and test(v,component[k]) for k, v in kwds.items()):
+                        res.append(component)
+            return res
 
         return self.at(*args, **kwds)
 
@@ -106,6 +141,8 @@ class QuakeMotion(dict):
         #for k,v in self.components.items():
         #    setattr(self,k,v)
         self.update(meta if meta is not None else {})
+        for comp in self.components.values():
+            comp._parent = self
 
     @property
     def long(self):
@@ -214,6 +251,7 @@ class QuakeComponent(dict):
             series._parent = self
 
         dict.__init__(self, **meta)
+
     @property
     def series(self):
         for s in "accel","veloc","displ":
@@ -221,6 +259,12 @@ class QuakeComponent(dict):
 
     def __repr__(self):
         return f"QuakeComponent({self['file_name']}) at {hex(id(self))}"
+
+    def find_components(self):
+        loc = self["location_name"]
+        for comp in self._parent.components.values():
+            if comp["location_name"] == loc:
+                yield comp
 
     def slice(self, *args):
         for s in "accel","veloc","displ":
@@ -308,18 +352,26 @@ class QuakeSeries(dict):
             return res
         return wrapped
 
-    def __init__(self, input_array, meta=None, time_zero=0.0):
+    def __init__(self, input_array, dt=None, meta=None, time_zero=0.0, **kwds):
         self._data = np.asarray(input_array)
         assert len(self.data.shape) == 1
         self.update(meta if meta is not None else {})
+        self.update(kwds)
         self._time = None
         self.time_zero = time_zero
+        if dt is not None:
+            self["time_step"] = dt
+        if "peak_value" not in self:
+            self._refresh()
 
     def __getitem__(self, key):
         try:
             return dict.__getitem__(self,key)
-        except KeyError:
-            return self._parent[key]
+        except KeyError as e:
+            if hasattr(self, "_parent"):
+                return self._parent[key]
+            else:
+                raise e
 
     def _refresh(self):
         self["peak_value"] = max(self.data, key=abs)
@@ -330,8 +382,11 @@ class QuakeSeries(dict):
         return self._data
 
     def __repr__(self):
-        filename=hex(id(self))
-        return f"QuakeSeries({filename},{self['units']})" #{dict.__repr__(self)})"
+        try:
+            filename=hex(id(self))
+            return f"QuakeSeries({filename},{self['units']})" #{dict.__repr__(self)})"
+        except:
+            return f"QuakeSeries([{self.data[0]}...{self.data[-1]}])"
     
     def serialize(
         self, key=None, summarize=False, serialize_data=True, humanize_keys=False
@@ -420,7 +475,7 @@ class QuakeSeries(dict):
         self._data = self.data[idx]
         return self
     
-    def plot(self, ax=None, fig=None, label=None, index=(None,),**kwds):
+    def plot(self, ax=None, fig=None, label=None, index=(None,), scale=1.0, **kwds):
         import matplotlib.pyplot as plt
         idx = slice(*index)
         time = self.time
@@ -431,7 +486,7 @@ class QuakeSeries(dict):
             label=self[label]
         if label is not None:
             kwds["label"] = label
-        ax.plot(time[idx],self.data[idx], **kwds)
+        ax.plot(time[idx],self.data[idx]*scale, **kwds)
         ax.set_ylabel(f"({self['units']})")
         ax.set_xlabel("time (sec.)")
         return ax
@@ -439,9 +494,15 @@ class QuakeSeries(dict):
 
 
 def rotate(data, angle):
-    output = copy(data)
+    #output = copy(data)
     if isinstance(data, QuakeComponent):
-        raise Exception("Unable to rotate single component")
+        try:
+            data._parent.rotate(angle)
+            #data = QuakeMotion(components={
+            #    i: c for c in data.find_components()
+            #})
+        except Exception as e:
+            raise Exception(f"Unable to rotate single component ({e})")
 
     elif isinstance(data, QuakeCollection):
         for name, record in data.items():
