@@ -10,8 +10,8 @@ from enum import Enum
 import numpy as np
 
 class st(Enum): ACCEL, DISPL, VELOC = range(3)
-class dt(Enum): LONG, TRAN, VERT = range(3)
-class pt(Enum): SECT, PLAN, ELEV = range(3)
+class dt(Enum): LONG,  TRAN,  VERT  = range(3)
+class pt(Enum): SECT,  PLAN,  ELEV  = range(3)
 
 
 DIRECTIONS = ["long", "tran", "up"]
@@ -42,8 +42,8 @@ class QuakeCollection(dict):
                 yield component
 
     def serialize(self, serialize_data=True, **kwds) -> dict:
-        #return {k: v.serialize(**kwds) for k, v in self.items()}
-        return {"motions": [i.serialize(**kwds) for i in self.motions.values()]}
+        data = {k: v for k, v in self.items()}
+        return {**data, "motions": [i.serialize(**kwds) for i in self.motions.values()]}
 
     @property
     def components(self):
@@ -151,6 +151,18 @@ class QuakeMotion(dict):
     def tran(self):
         return self.components["tran"]
 
+    @property
+    def accel(self):
+        return np.stack(tuple(c.accel for c in self.components.values())).T
+
+    @property
+    def veloc(self):
+        return np.stack(tuple(c.veloc for c in self.components.values())).T
+
+    @property
+    def displ(self):
+        return np.stack(tuple(c.displ for c in self.components.values())).T
+
     def __repr__(self):
         #return f"QuakeMotion({dict.__repr__(self)})"
         return f"QuakeMotion({dict.__repr__(self)})"
@@ -195,12 +207,20 @@ class QuakeMotion(dict):
         return self
 
     @_update_components
-    def rotate(self, angle=None, rotation=None):
+    def rotate(self, angle=None, rotation=None, vert=None):
+        """
+        > NOTE: This method changes data in the class instance.
+        """
+
+        if vert == 3:
+            angle *= -1
+
         rx, ry = (
-            np.array([[ np.cos(angle), np.sin(angle)], 
-                      [-np.sin(angle), np.cos(angle)]])
+            np.array([[ np.cos(angle),-np.sin(angle)], 
+                      [ np.sin(angle), np.cos(angle)]])
             if not rotation else rotation
         )
+
         try:
             for attr in ["accel", "veloc", "displ"]:
                 x = getattr(self.components["long"], attr).data
@@ -208,11 +228,6 @@ class QuakeMotion(dict):
                 X = np.array([x, y])
                 x[:] = np.dot(rx, X)
                 y[:] = np.dot(ry, X)
-
-                #x, y = map(lambda d: self.components[d][f"peak_{attr}"], ["long", "tran"])
-                #X = np.array([x, y])
-                #self.components["long"][f"peak_{attr}"] = float(np.dot(rx, X))
-                #self.components["tran"][f"peak_{attr}"] = float(np.dot(ry, X))
 
         except KeyError as e:
             raise AttributeError("Attempt to rotate a motion that"\
@@ -229,7 +244,7 @@ class QuakeMotion(dict):
                     np.power(getattr(self.components[dirn],typ), 2)
                     for dirn in self.directions 
                         if dirn in self.components and self.components[dirn]
-                ))#.sqrt()
+                ))
             except AttributeError as e:
                 raise e
         return QuakeComponent(*series.values())

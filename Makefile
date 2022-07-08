@@ -16,9 +16,11 @@ install:
 cov:
 	coverage run --source=. -m pytest
 	coverage-badge > ./etc/coverage/cov.svg
+
 test:
 	bash tests/tests.sh
 	pytest
+
 
 api:
 	$(PDOC) --config show_source_code=False \
@@ -33,8 +35,8 @@ web: FORCE
 docs: web FORCE
 
 publish:
-	pip uninstall $(PACKAGE)
-	$(PYTHON) setup.py clean --all sdist bdist_wheel
+	#pip uninstall $(PACKAGE)
+	#$(PYTHON) setup.py clean --all sdist bdist_wheel
 	twine upload --verbose --skip-existing dist/*
 	git tag -a $(VERSION) -m 'version $(VERSION)'
 	git push --tags
