@@ -166,19 +166,16 @@ class QuakeMotion(dict):
         ret.components = {}
         for dirn in DIRECTIONS:
             if dirn in other.components and dirn in self.components:
-                ret.components[dirn] = (
-                    self.components[dirn] - other.components[dirn] 
-                )
+                ret.components[dirn] = self.components[dirn] - other.components[dirn] 
         return ret
     
     def __add__(self, other):
         ret = copy(self)
         ret.components = {}
         for dirn in DIRECTIONS:
-            ret.components[dirn] = (
-                self.components[dirn] + other.components[dirn] 
-                if dirn in other.components and dirn in self.components else None
-            )
+            if dirn in other.components and dirn in self.components:
+                ret.components[dirn] = self.components[dirn] + other.components[dirn] 
+
         return ret
     
     def __rsub__(self, other):
@@ -369,7 +366,7 @@ class QuakeSeries(dict):
         self._time = None
         self.time_zero = time_zero
         if dt is not None:
-            self["time_step"] = dt
+            self.time_step = self["time_step"] = dt
         if "peak_value" not in self:
             self._refresh()
 

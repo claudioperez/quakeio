@@ -206,7 +206,8 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
         "file_name": str(read_file),
         "peak_accel": peak_accel, 
         "event_date": date,
-        "station_name": first_component.get("station_name", "NA")
+        "station_name": first_component.get("station_name", "NA"),
+        "station_number": first_component.get("station.no", "NA")
     }
     return QuakeCollection(dict(motions), event_date=date, meta=metadata)
 
