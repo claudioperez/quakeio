@@ -240,6 +240,61 @@ class QuakeMotion(dict):
                 raise e
         return QuakeComponent(*series.values())
 
+    def match(self, t, *args, **kwds):
+        if callable(t):
+            pass
+
+        assert type(t) == str
+
+        if t[0] == "l":
+            return self.at(*args, **kwds)
+        if t[0] == "r":
+            import re
+            test = lambda x, y: re.match(x, y)
+        elif t == ">":
+            test = lambda x, y: x > y
+        elif t == "<":
+            test = lambda x, y: x < y
+
+        if len(t) > 1:
+            typ = "multi"
+        else:
+            typ = "single"
+
+        if typ=="single":
+            for motion in self.components.values():
+                tests = (
+                  k in motion and test(v, motion[k]) for k, v in kwds.items()
+                )
+                if all(tests):
+                    return motion
+
+        elif typ=="multi":
+            res = []
+            for motion in self.components.values():
+                tests = (
+                  k in motion and test(v, motion[k]) for k, v in kwds.items()
+                )
+                if all(tests):
+                    res.append(motion)
+            return res
+
+        return self.at(*args, **kwds)
+
+    def at(self, rtol=1e-05, atol=1e-08, **kwds):
+        print(kwds)
+        for motion in self.components.values():
+            tests = (
+              k in motion and (
+                np.isclose(motion[k],v, rtol=rtol, atol=atol) if isinstance(v,float)\
+                        else (motion[k] == v)
+              ) for k, v in kwds.items()
+            )
+            if all(tests):
+                return motion
+
+        return []
+
 
 class QuakeComponent(dict):
     """A container of QuakeSeries objects"""
@@ -380,7 +435,8 @@ class QuakeSeries(dict):
                 raise e
 
     def _refresh(self):
-        self["peak_value"] = max(self.data, key=abs)
+        if len(self.data) > 0:
+            self["peak_value"] = max(self.data, key=abs)
         return self
 
     @property
