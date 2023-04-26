@@ -3998,5 +3998,5 @@ accel = quakeio.core.QuakeSeries([
 ], dt=0.02)
 
 if __name__ == "__main__":
-    print(*accel.data)
+    print("\n".join(map(str,accel.data)))
 
