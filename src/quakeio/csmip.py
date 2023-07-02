@@ -95,9 +95,9 @@ HEADER_FIELDS = {
     # line 8
     # ("record.channel", "record.component", "_", "record.station_channel", "record.location_name"): (
     ("record.channel", "record.component", "_", "_", "record.location_name"): (
-        (str, str, maybe_t("(Deg)",str), maybe_t("Sta Chn: ([0-9]*)", words), words),
+        (str, str, maybe_t("(DegR*)",str), maybe_t("Sta Chn: ([0-9]*)", words), words),
         re.compile(# (  1   )   (---------)  (---)   (--)             (------)
-            rf"Chan *([0-9]*): *([A-z0-9]*) *(Deg)? *(.*) *Location: *([ -~]*)\s",
+            rf"Chan *([0-9]*): *([A-z0-9]*) *(DegR*)? *(.*) *Location: *([ -~]*)\s",
             re.IGNORECASE
         )
     ),
@@ -191,10 +191,10 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
 
     first_motion = list(motions.values())[0]
     first_component = list(first_motion.components.values())[0]
-    date = first_component["date"]
+    date = first_component.get("date", "NA")
     if v1 and not summarize:
         peak_accel = max(
-            (max(c.accel.data, key=abs) for m in motions.values() for c in m.components.values()), 
+            (max(c.accel.data, key=abs) for m in motions.values() for c in m.components.values()),
             key=abs
         )
     else:
@@ -204,9 +204,10 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
         )
     metadata = {
         "file_name": str(read_file),
-        "peak_accel": peak_accel, 
+        "peak_accel": peak_accel,
         "event_date": date,
-        "station_name": first_component.get("station_name", "NA")
+        "station_name": first_component.get("station_name", "NA"),
+        "station_number": first_component.get("station.no", "NA")
     }
     return QuakeCollection(dict(motions), event_date=date, meta=metadata)
 
@@ -245,11 +246,15 @@ def read_record_v2(
     #print(list(header_fields.keys()))
 
 
-    # Parse header fields
-    with open_quake(read_file, "r", archive) as f:
-        header_data = parse_sequential_fields(f, header_fields, verbose=verbosity)
+    try:
+        # Parse header fields
+        with open_quake(read_file, "r", archive) as f:
+            header_data = parse_sequential_fields(f, header_fields, verbose=verbosity)
+        header_data.pop("_")
+    except:
+        header_data = {}
 
-    header_data.pop("_")
+
     # Reopen and parse out data; Note, only the first call
     # provides a skip_header argument as successive reads
     # pick up where the previous left off.
@@ -283,6 +288,7 @@ def read_record_v2(
             delimiter=10,
             ).flatten()
         )
+
         assert len(real_header) == (50 if v1 else 100)
         num_header = _process_numeric_headers_v2(int_header, real_header, header_data)
 
@@ -290,7 +296,7 @@ def read_record_v2(
         s = next(f)
         s = s if isinstance(s, str) else s.decode("utf-8")
         len_accel = int(re.match("^ *([0-9]*) *.*", s).group(1))
-        
+
         # extract format specifier, eg "(8f9.6)" if provided
         data_fmt = re.match(r"\(8f(.*)\)", s)
         if data_fmt:
@@ -307,7 +313,6 @@ def read_record_v2(
             accel = np.genfromtxt(
                 f,
                 # skip_header=HEADER_END_LINE + 1,
-                #skip_header=1,
                 max_rows=np.ceil(len_accel/NUM_COLUMNS) - 1,
                 **parse_options,
             ).flatten()
@@ -347,8 +352,10 @@ def read_record_v2(
         }
     except:
         filter_data = {}
+
     record_data = {"filters": [{"filter_type": "bandpass",**filter_data}]}
     series_data = defaultdict(dict)
+
     for key, val in header_data.items():
         typ, k = key.split(".", 1)
         if typ == "record":
@@ -358,6 +365,7 @@ def read_record_v2(
 
     record_data["file_name"] = filename.name
     record_data["station_channel"] = str(int(re_digits.search(filename.name.split(".")[0]).group(0)))
+
     try:
         record_data.update({
             "peak_displ": series_data["displ"]["peak_value"],
