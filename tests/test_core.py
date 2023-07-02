@@ -11,8 +11,8 @@ def test_rotate():
     time = 23
     angle = 21/7/3
     rotation = np.array([
-        [ np.cos(angle), np.sin(angle)],
-        [-np.sin(angle), np.cos(angle)]
+        [ np.cos(angle),-np.sin(angle)],
+        [ np.sin(angle), np.cos(angle)]
     ])
 
     # read event
@@ -47,8 +47,8 @@ def test_rotate_displ():
     time = 23
     angle = 21/7/3
     rotation = np.array([
-        [ np.cos(angle), np.sin(angle)],
-        [-np.sin(angle), np.cos(angle)]
+        [ np.cos(angle),-np.sin(angle)],
+        [ np.sin(angle), np.cos(angle)]
     ])
 
     # read event
@@ -76,3 +76,4 @@ def test_rotate_displ():
     # Assert rotation matches manual calc
     assert np.isclose(float(D_long_rot.data[time]), float(a_calc_long))
     assert np.isclose(float(D_tran_rot.data[time]), float(a_calc_tran))
+
