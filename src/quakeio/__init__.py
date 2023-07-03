@@ -48,7 +48,7 @@ def write(write_file, ground_motion, write_format: str = None, *args, **kwds):
         typ = write_format
     else:
         try:
-            typ = DEFAULT_TYPES[Path(write_file).suffix]
+            typ = DEFAULT_TYPES[Path(write_file).suffix.lower()]
         except KeyError:
             raise ValueError("Unable to deduce output format")
     FILE_TYPES[typ]["write"](write_file, ground_motion, *args, **kwds)
