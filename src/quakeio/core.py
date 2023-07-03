@@ -10,8 +10,8 @@ from enum import Enum
 import numpy as np
 
 class st(Enum): ACCEL, DISPL, VELOC = range(3)
-class dt(Enum): LONG, TRAN, VERT = range(3)
-class pt(Enum): SECT, PLAN, ELEV = range(3)
+class dt(Enum): LONG,  TRAN,  VERT  = range(3)
+class pt(Enum): SECT,  PLAN,  ELEV  = range(3)
 
 
 DIRECTIONS = ["long", "tran", "up"]
@@ -25,6 +25,7 @@ class QuakeCollection(dict):
     def __init__(self, motions, event_date=None, meta=None, **kwds):
         meta = meta if meta is not None else {}
         dict.__init__(self, **meta)
+
         self.motions = motions
         self.event_date = event_date
         for motion in motions.values():
@@ -34,6 +35,12 @@ class QuakeCollection(dict):
 
     def __repr__(self):
         return f"QuakeCollection({dict.__repr__(self)})"
+
+    @property
+    def components(self):
+        for motion in self.motions.values():
+            for component in motion.components.values():
+                yield component
 
     def serialize(self, serialize_data=True, **kwds) -> dict:
         data = {k: v for k, v in self.items()}
@@ -145,6 +152,18 @@ class QuakeMotion(dict):
     def tran(self):
         return self.components["tran"]
 
+    @property
+    def accel(self):
+        return np.stack(tuple(c.accel for c in self.components.values())).T
+
+    @property
+    def veloc(self):
+        return np.stack(tuple(c.veloc for c in self.components.values())).T
+
+    @property
+    def displ(self):
+        return np.stack(tuple(c.displ for c in self.components.values())).T
+
     def __repr__(self):
         #return f"QuakeMotion({dict.__repr__(self)})"
         return f"QuakeMotion({dict.__repr__(self)})"
@@ -154,19 +173,16 @@ class QuakeMotion(dict):
         ret.components = {}
         for dirn in DIRECTIONS:
             if dirn in other.components and dirn in self.components:
-                ret.components[dirn] = (
-                    self.components[dirn] - other.components[dirn] 
-                )
+                ret.components[dirn] = self.components[dirn] - other.components[dirn] 
         return ret
     
     def __add__(self, other):
         ret = copy(self)
         ret.components = {}
         for dirn in DIRECTIONS:
-            ret.components[dirn] = (
-                self.components[dirn] + other.components[dirn] 
-                if dirn in other.components and dirn in self.components else None
-            )
+            if dirn in other.components and dirn in self.components:
+                ret.components[dirn] = self.components[dirn] + other.components[dirn] 
+
         return ret
     
     def __rsub__(self, other):
@@ -189,12 +205,20 @@ class QuakeMotion(dict):
         return self
 
     @_update_components
-    def rotate(self, angle=None, rotation=None):
+    def rotate(self, angle=None, rotation=None, vert=None):
+        """
+        > NOTE: This method changes data in the class instance.
+        """
+
+        if vert == 3:
+            angle *= -1
+
         rx, ry = (
-            np.array([[ np.cos(angle), np.sin(angle)], 
-                      [-np.sin(angle), np.cos(angle)]])
+            np.array([[ np.cos(angle),-np.sin(angle)], 
+                      [ np.sin(angle), np.cos(angle)]])
             if not rotation else rotation
         )
+
         try:
             for attr in ["accel", "veloc", "displ"]:
                 x = getattr(self.components["long"], attr).data
@@ -202,11 +226,6 @@ class QuakeMotion(dict):
                 X = np.array([x, y])
                 x[:] = np.dot(rx, X)
                 y[:] = np.dot(ry, X)
-
-                #x, y = map(lambda d: self.components[d][f"peak_{attr}"], ["long", "tran"])
-                #X = np.array([x, y])
-                #self.components["long"][f"peak_{attr}"] = float(np.dot(rx, X))
-                #self.components["tran"][f"peak_{attr}"] = float(np.dot(ry, X))
 
         except KeyError as e:
             raise AttributeError("Attempt to rotate a motion that"\
@@ -223,10 +242,65 @@ class QuakeMotion(dict):
                     np.power(getattr(self.components[dirn],typ), 2)
                     for dirn in self.directions 
                         if dirn in self.components and self.components[dirn]
-                ))#.sqrt()
+                ))
             except AttributeError as e:
                 raise e
         return QuakeComponent(*series.values())
+
+    def match(self, t, *args, **kwds):
+        if callable(t):
+            pass
+
+        assert type(t) == str
+
+        if t[0] == "l":
+            return self.at(*args, **kwds)
+        if t[0] == "r":
+            import re
+            test = lambda x, y: re.match(x, y)
+        elif t == ">":
+            test = lambda x, y: x > y
+        elif t == "<":
+            test = lambda x, y: x < y
+
+        if len(t) > 1:
+            typ = "multi"
+        else:
+            typ = "single"
+
+        if typ=="single":
+            for motion in self.components.values():
+                tests = (
+                  k in motion and test(v, motion[k]) for k, v in kwds.items()
+                )
+                if all(tests):
+                    return motion
+
+        elif typ=="multi":
+            res = []
+            for motion in self.components.values():
+                tests = (
+                  k in motion and test(v, motion[k]) for k, v in kwds.items()
+                )
+                if all(tests):
+                    res.append(motion)
+            return res
+
+        return self.at(*args, **kwds)
+
+    def at(self, rtol=1e-05, atol=1e-08, **kwds):
+        print(kwds)
+        for motion in self.components.values():
+            tests = (
+              k in motion and (
+                np.isclose(motion[k],v, rtol=rtol, atol=atol) if isinstance(v,float)\
+                        else (motion[k] == v)
+              ) for k, v in kwds.items()
+            )
+            if all(tests):
+                return motion
+
+        return []
 
 
 class QuakeComponent(dict):
@@ -354,7 +428,7 @@ class QuakeSeries(dict):
         self._time = None
         self.time_zero = time_zero
         if dt is not None:
-            self["time_step"] = dt
+            self.time_step = self["time_step"] = dt
         if "peak_value" not in self:
             self._refresh()
 
@@ -368,7 +442,8 @@ class QuakeSeries(dict):
                 raise e
 
     def _refresh(self):
-        self["peak_value"] = max(self.data, key=abs)
+        if len(self.data) > 0:
+            self["peak_value"] = max(self.data, key=abs)
         return self
 
     @property
@@ -419,7 +494,7 @@ class QuakeSeries(dict):
         elif isinstance(other, (float, int)):
             ret._data += other
         return ret
-    
+
     @_update_metadata
     def __mul__(self, other):
         if isinstance(other, (float, int)):
@@ -428,7 +503,7 @@ class QuakeSeries(dict):
         else:
             raise TypeError()
         return ret
-    
+
     @_update_metadata
     def sqrt(self, inplace=False):
         ret = copy(self)
@@ -468,8 +543,10 @@ class QuakeSeries(dict):
         self.time_zero = self._time[0]
         self._data = self.data[idx]
         return self
-    
+
     def plot(self, ax=None, fig=None, label=None, index=(None,), scale=1.0, **kwds):
+        # matplotlib takes a very long time to import; avoid
+        # loading at module level.
         import matplotlib.pyplot as plt
         idx = slice(*index)
         time = self.time
@@ -492,9 +569,6 @@ def rotate(data, angle):
     if isinstance(data, QuakeComponent):
         try:
             data._parent.rotate(angle)
-            #data = QuakeMotion(components={
-            #    i: c for c in data.find_components()
-            #})
         except Exception as e:
             raise Exception(f"Unable to rotate single component ({e})")
 
