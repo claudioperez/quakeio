@@ -189,10 +189,6 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
             motions[loc].components[drn] = cmp
 
 
-    first_motion = list(motions.values())[0]
-    first_component = list(first_motion.components.values())[0]
-
-    date = first_component.get("date", "NA")
 
     if v1 and not summarize:
         peak_accel = max(
@@ -201,15 +197,22 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
         )
     else:
         peak_accel = max(
-            (c.accel.get("peak_value", 0) for m in motions.values() for c in m.components.values()), 
+            (c.accel.get("peak_value", 0.0) for m in motions.values() for c in m.components.values()), 
             key=abs
         )
+
+    first_motion = list(motions.values())[0]
+    first_component = list(first_motion.components.values())[0]
+
+    date = first_component.get("date", "NA")
     metadata = {
         "file_name": str(read_file),
         "peak_accel": peak_accel,
         "event_date": date,
-        "station_name": first_component.get("station_name", "NA"),
-        "station_number": first_component.get("station.no", "NA")
+        "station_name":      first_component.get("station_name", "NA"),
+        "station_coord":     first_component.get("station.coord", "NA"),
+        "record_identifier": first_component.get("record_identifier", "NA"),
+        "station_number":    first_component.get("station.no", "NA")
     }
     return QuakeCollection(dict(motions), event_date=date, meta=metadata)
 
@@ -234,6 +237,7 @@ def read_record_v2(
         FIELDS = V1_HEADER_FIELDS
     else:
         FIELDS = HEADER_FIELDS
+
     filename = Path(read_file)
     keys = []
     for x in exclusions:
@@ -245,8 +249,6 @@ def read_record_v2(
     #         if verbosity: print(k)
     #         HEADER_FIELDS.pop(k)
     header_fields = {k: v for k,v in FIELDS.items() if k not in keys}
-    #print(list(header_fields.keys()))
-
 
     try:
         # Parse header fields
