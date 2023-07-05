@@ -1,7 +1,7 @@
 # Claudio Perez
-# 2021
+# Summer 2021
 """
-Parse a CSMIP Volume 2 strong motion data file.
+Parse a CSMIP strong motion data file.
 """
 import re
 import sys
@@ -13,13 +13,11 @@ from collections import defaultdict
 
 import numpy as np
 
-
 from .core import (
     QuakeCollection,
     QuakeMotion,
     QuakeComponent,
     QuakeSeries,
-    # RealNumber
 )
 
 from .utils.parseutils import (
@@ -41,12 +39,16 @@ INTEGER_HEADER_START_LINE = 25
 INTEGER_HEADER_END_LINE = 25+7
 REAL_HEADER_END_LINE = 45
 
-
 DATEFMT = "%m/%d/%y, %H:%M" #:%S.%f %Z"
-to_key = lambda strng: strng.strip().replace(" ", "_").lower()
 
-words = lambda x: CRE_WHITE.sub(" ", str(x)).strip()
-units = lambda x: str(x).strip().lower()
+# A utility to convert general strings into
+# appropriate keys.
+_make_key = lambda strng: strng.strip().replace(" ", "_").lower()
+
+# Definition of some type constructors, used to coerce
+# the result of a regex match.
+words  = lambda x: CRE_WHITE.sub(" ", str(x)).strip()
+units  = lambda x: str(x).strip().lower()
 
 class FindDate:
     pat1  = re.compile(r"([A-z]* of )? ([A-z]{,5} [A-z]{,5} [0-9]{,2}, [0-9]{4} [0-9]{2}:[0-9]{2}:"+RE_DECIMAL+" [A-Z]{,4})")
@@ -59,14 +61,20 @@ class FindDate:
             print(match)
             return (["", *match[0]],)
 
-
-# fmt: off
-# Dict[
-#   Tuple[*[Key]],
-#   Tuple[ Tuple[*[Type]], RegExp]
-# ]
+# PARSE TABLE
+# ----------------------------------------------------------------
+# The parse table defines all of the fields than can be extracted
+# from a CSMIP file, and maps these fields to (1) a data type and 
+# (2) regular expression. This table has the following structure:
+#
+#   Dict[
+#     Tuple[*[Key]],
+#     Tuple[ Tuple[*[Type]], RegExp]
+#   ]
+#
 # leading key (ie key.split(".")[0]) determines whether
 # field is part of record or accel/veloc/displ series.
+# fmt: off
 HEADER_FIELDS = {
     # line 1
     ("_", "record.record_identifier"): ((str, str),
@@ -168,40 +176,60 @@ V1_HEADER_FIELDS.update({
 def read_event(read_file, verbosity=0, summarize=False, **kwds):
     """
     Take the name of a CSMIP zip file and extract record data for the event.
+
+    - kwds are passed to read_motion_v2
     """
 
-    zippath = Path(read_file)
-    archive = zipfile.ZipFile(zippath)
     components = []
-    motions = defaultdict(QuakeMotion)
+    zippath    = Path(read_file)
+    archive    = zipfile.ZipFile(zippath)
+    motions    = defaultdict(QuakeMotion)
+    
+    # Loop over V1 and V2 files in the zipped archive
     for file in archive.namelist():
-        if verbosity > 2: print(f"\t\t{file}")
-        if file.endswith((".v2", ".V2", ".v1", ".V1")):
-            v1 = True if file.endswith((".v1", ".V1")) else False
-            if verbosity:
-                print(file, file=sys.stderr)
-            cmp = read_record_v2(file, archive, verbosity=verbosity, summarize=summarize, v1=v1, **kwds)
-            loc = to_key(cmp.get("location_name", str(file)))
-            drn = to_key(cmp.get("component", "NA"))
-            if drn in motions[loc].components:
-                loc += "_alt"
-            motions[loc]["key"] = loc
-            motions[loc].components[drn] = cmp
+        # Disregard any files that are not V1 or V2
+        if not file.endswith((".v2", ".V2", ".v1", ".V1")):
+            continue
+
+        # Optional info logging
+        if verbosity > 2: print(f"\t\t{file}", file=sys.stderr)
+
+        v1 = True if file.endswith((".v1", ".V1")) else False
+
+        cmp = read_record_v2(file, archive, verbosity=verbosity, summarize=summarize, v1=v1, **kwds)
+        loc = _make_key(cmp.get("location_name", str(file)))
+        drn = _make_key(cmp.get("component", "NA"))
+
+        # Check that a Component with this direction has not already been
+        # added to the Motion container under this location. This should
+        # not happen, but is checked for robustness.
+        if drn in motions[loc].components:
+            loc += "_alt"
+
+        motions[loc]["key"] = loc
+        motions[loc].components[drn] = cmp
 
 
-
+    # EVENT-LEVEL METADATA
+    # Compute peak values over the entire archive.
+    # --------------------------------------------
+    # V1 files may not give peak values for the individual files (components), 
+    # so in this case they are computed manually.
     if v1 and not summarize:
         peak_accel = max(
             (max(c.accel.data, key=abs) for m in motions.values() for c in m.components.values()),
             key=abs
         )
+
+    # Otherwise, just take the peaks from the parsed metadata.
     else:
         peak_accel = max(
             (c.accel.get("peak_value", 0.0) for m in motions.values() for c in m.components.values()), 
             key=abs
         )
 
-    first_motion = list(motions.values())[0]
+    # Collect someother information from the first file (component)
+    first_motion    = list(motions.values())[0]
     first_component = list(first_motion.components.values())[0]
 
     date = first_component.get("date", "NA")
@@ -217,16 +245,17 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
     return QuakeCollection(dict(motions), event_date=date, meta=metadata)
 
 
-
+# Fields that are not provided in the V1 format.
 V1_EXCLUDE = ("filter*", "*peak*", "*init*", "*disp*", "*velo*")
+
 
 def read_record_v2(
     read_file, 
     archive: zipfile.ZipFile = None,
-    verbosity=0,
-    summarize=False,
-    v1 = False,
-    exclusions=(),
+    verbosity: int  = 0,
+    summarize: bool =False,
+    v1: bool = False,
+    exclusions: tuple = (),
     **kwds
 ) -> QuakeComponent:
     """
@@ -239,31 +268,34 @@ def read_record_v2(
         FIELDS = HEADER_FIELDS
 
     filename = Path(read_file)
+
+    # 1. PARSE READABLE HEADER (Regular expressions)
+    # Collect keys to exclude
     keys = []
     for x in exclusions:
         for k in FIELDS:
             if any(fnmatch.fnmatch(kk,x) for kk in k):
                 keys.append(k)
-    # for k in keys:
-    #     if k in HEADER_FIELDS:
-    #         if verbosity: print(k)
-    #         HEADER_FIELDS.pop(k)
+
     header_fields = {k: v for k,v in FIELDS.items() if k not in keys}
 
+    # Parse header fields
     try:
-        # Parse header fields
         with open_quake(read_file, "r", archive) as f:
             header_data = parse_sequential_fields(f, header_fields, verbose=verbosity)
         header_data.pop("_")
     except:
+        if verbosity:
+            print("Failed to parse header data for file {filename.name}", file=sys.stderr)
         header_data = {}
 
 
+    # 2. PARSE NUMERIC HEADERS
     # Reopen and parse out data; Note, only the first call
     # provides a skip_header argument as successive reads
     # pick up where the previous left off.
     with open_quake(read_file, "r", archive) as f:
-        # 50 integer values spanning 7 lines  between lines 26-32
+        # 50 integer values spanning 7 lines between lines 26-32
         int_header = np.genfromtxt(
             f,
             dtype=int,
@@ -294,13 +326,13 @@ def read_record_v2(
         )
 
         assert len(real_header) == (50 if v1 else 100)
+        
+        # Clean and process numeric header data, setup for parse stage 3.
         num_header = _process_numeric_headers_v2(int_header, real_header, header_data)
-
         # extract information about shape of data
         s = next(f)
         s = s if isinstance(s, str) else s.decode("utf-8")
         len_accel = int(re.match("^ *([0-9]*) *.*", s).group(1))
-
         # extract format specifier, eg "(8f9.6)" if provided
         data_fmt = re.match(r"\(8f(.*)\)", s)
         if data_fmt:
@@ -313,6 +345,8 @@ def read_record_v2(
             dtype=float,
         )
 
+        # 3. PARSE OUT SENSOR DATA
+        # Note that successive file reads will begin where we left off
         if not summarize:
             accel = np.genfromtxt(
                 f,
@@ -342,7 +376,7 @@ def read_record_v2(
         else:
             accel, veloc, displ = [], [], []
 
-    # Extract metadata
+    # Treat metadata
     try:
         filter_data = {
             key[16:]: header_data.pop(key)
@@ -378,8 +412,10 @@ def read_record_v2(
         })
     except:
         pass
-    #record_data["ihdr"] = list(int_header)
-    #record_data["rhdr"] = list(real_header)
+
+    # The raw numeric header data hasnt been too useful
+    # record_data["ihdr"] = list(int_header)
+    # record_data["rhdr"] = list(real_header)
     return QuakeComponent(
         QuakeSeries(accel, meta=series_data["accel"]),
         QuakeSeries(veloc, meta=series_data["veloc"]),
@@ -398,19 +434,19 @@ def _process_numeric_headers_v2(ihdr, rhdr, txthdr):
     #assert ihdr[28 -1] == ihdr[51-1]
 
 
+# Declare file types handled by this module
 FILE_TYPES = {
-    "csmip.v1":  {"type": QuakeComponent, "read": read_record_v2},
-    "csmip.v2":  {"type": QuakeComponent, "read": read_record_v2},
-    "csmip.v3":  {"type": QuakeComponent, "read": read_record_v2, "spec": ""},
+    "csmip.v1":  {"type": QuakeComponent,  "read": read_record_v2},
+    "csmip.v2":  {"type": QuakeComponent,  "read": read_record_v2},
+    "csmip.v3":  {"type": QuakeComponent,  "read": read_record_v2, "spec": ""},
     "csmip.zip": {"type": QuakeCollection, "read": read_event},
 }
 
 
 def read_record(read_file, *args):
     file = Path(read_file)
-    if file.suffix == ".v2":
+    if file.suffix.lower() == ".v2":
         return read_record_v2(file)
-
 
 def read(read_file, input_format=None):
     pass

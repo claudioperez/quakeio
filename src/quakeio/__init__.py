@@ -5,8 +5,8 @@ from pathlib import Path
 
 from . import csmip, nga, eqsig, basic_formats, opensees
 
-
 FILE_TYPES = {}
+
 # Avoid repeated dot lookup
 _register_file_type = FILE_TYPES.update
 _register_file_type(nga.FILE_TYPES)
@@ -15,12 +15,15 @@ _register_file_type(eqsig.FILE_TYPES)
 _register_file_type(basic_formats.FILE_TYPES)
 _register_file_type(opensees.FILE_TYPES)
 
+# Map different file extensions to the name
+# of the parser that should be used by default
+# (when format argument is not explicitly passed).
 DEFAULT_TYPES = {
-    ".at2": "nga.at2",
-    ".AT2": "nga.at2",
-    ".zip": "csmip.zip",
-    ".v2": "csmip.v2",
-    ".V2": "csmip.v2",
+    ".at2":  "nga.at2",
+    ".AT2":  "nga.at2",
+    ".zip":  "csmip.zip",
+    ".v2":   "csmip.v2",
+    ".V2":   "csmip.v2",
     ".json": "json",
 }
 
@@ -55,5 +58,4 @@ def write(write_file, ground_motion, write_format: str = None, *args, **kwds):
 
 def dumps(ground_motion, **kwds):
     return basic_formats.dumps_json(ground_motion, **kwds)
-
 
