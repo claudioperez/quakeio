@@ -51,10 +51,6 @@ import numpy as np
 
 import quakeio
 
-ground_channels = [1, 2, 3, 6, 7, 17, 18, 24, 25]
-bridge_channels = [11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23]
-
-
 class YamlDumper(yaml.SafeDumper):
     # This class handles formatting of some datatypes
     # when generating YAML output
@@ -75,7 +71,7 @@ YamlDumper.add_representer(float, float_representer)
 
 # Some simple utility functions
 dump_yaml = lambda x: yaml.dump(x, Dumper=YamlDumper,sort_keys=False)
-align = lambda strng: strng.ljust(30,".")
+align = lambda strng: strng.ljust(30, ".")
 
 
 def consolidate_records(data):
@@ -203,6 +199,10 @@ if __name__ == "__main__":
     else:
         print("usage: python summarize.py ZIP_FILE")
         sys.exit()
+
+    ground_channels = [ 1,  2,  3,  6,  7, 17, 18, 24, 25]
+    bridge_channels = [11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23]
+
 
     event = quakeio.read(file_name, "csmip.zip", summarize=True)
     brdg, grnd = extract_peaks(event, bridge_channels, ground_channels)
