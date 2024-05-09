@@ -25,7 +25,10 @@
                                                                         
 #ifndef PeerMotion_h
 #define PeerMotion_h
-
+#include <iostream>
+#ifndef OPS_Stream
+#  define OPS_Stream std::ostream
+#endif
 // Written: fmk 
 // Created: 10/06
 //
@@ -39,11 +42,10 @@
 //
 // What: "@(#) PeerMotion.h, revA"
 
-#include <TimeSeries.h>
 
 class Vector;
 
-class PeerMotion : public TimeSeries
+class PeerMotion
 {
   public:
     // constructors  
@@ -58,7 +60,6 @@ class PeerMotion : public TimeSeries
   // destructor    
   ~PeerMotion();
 
-  TimeSeries *getCopy(void);
   
   // method to get factor
     double getFactor(double pseudoTime);
@@ -67,12 +68,7 @@ class PeerMotion : public TimeSeries
     double getTimeIncr (double pseudoTime);
     double getDt();
     int getNPts();
-
-    // methods for output
-    int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel, 
-		 FEM_ObjectBroker &theBroker);
-    
+ 
     void Print(OPS_Stream &s, int flag =0);    
     
  protected:
@@ -90,7 +86,7 @@ class PeerMotion : public TimeSeries
     int lastSendCommitTag;
     int otherDbTag;       // a database tag needed for the vector object   
      
-    Channel *lastChannel;
+    void *lastChannel;
 };
 
 #endif

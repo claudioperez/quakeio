@@ -1,7 +1,7 @@
-#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 #ifdef _WIN32
@@ -20,7 +20,7 @@
 
 
 #define MAX_UDP_DATAGRAM 9126
-#define MAX_INET_ADDR 28
+#define MAX_INET_ADDR    28
 
 #ifdef _WIN32
   typedef SOCKET socket_type;
@@ -35,28 +35,26 @@
 
 int startup_sockets(void)
 {
-  #ifdef _WIN32
-  
+#ifdef _WIN32  
   WSADATA wsaData;
   if (numSockets == 0) {
     numSockets++;
     return WSAStartup(0x0002, &wsaData) == 0;
   } else
     return 1;
-  #else
+#else
     return 1;
-  #endif
+#endif
 } 
 
 
 void cleanup_sockets(void)
 {
-  #ifdef _WIN32
+#ifdef _WIN32
   numSockets--;
-  if (numSockets == 0) {
+  if (numSockets == 0)
     WSACleanup();
-  }
-  #endif
+#endif
 }
 
 
@@ -76,7 +74,7 @@ establishHTTPConnection(const char* URL, unsigned int port) {
   socket_type sockfd;
   socklen_type addrLength;
   struct hostent *hostEntry;
- struct in_addr ip;
+  struct in_addr ip;
   unsigned int myPort;
 
   /* check inputs */
@@ -133,8 +131,7 @@ establishHTTPConnection(const char* URL, unsigned int port) {
   
   /* now try to connect to socket with remote address. */
   if (connect(sockfd, (struct sockaddr *) &other_Addr.addr_in, 
-	      sizeof(other_Addr.addr_in))< 0) {
-    
+	      sizeof(other_Addr.addr_in))< 0) { 
     fprintf(stderr,"establishHTTPConnection - could not connect\n");
     return -4;
   }
@@ -147,10 +144,10 @@ establishHTTPConnection(const char* URL, unsigned int port) {
 
 
 int
-httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr) {
+httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr)
+{
 
-
-  int i, j, nleft, nwrite, sizeData, ok;
+  int sizeData;
   char *gMsg, *data, *nextData;
   char outBuf[4096], inBuf[4096];
   socket_type sockfd;
@@ -171,13 +168,13 @@ httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr) {
 
   sprintf(outBuf, "GET %s HTTP/1.1\nHost:%s\n",page,URL);
   strcat(outBuf, "Connection:close\n\n");
-  nleft = strlen(outBuf);
 
+  int nleft = strlen(outBuf);
 
   //send the data
   // if o.k. get a ponter to the data in the message and 
   // place the incoming data there
-  nwrite = 0;    
+  int nwrite = 0;    
   gMsg = outBuf;
   
   while (nleft > 0) {
@@ -186,7 +183,8 @@ httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr) {
     gMsg +=  nwrite;
   }
 
-  ok = 1;
+// 
+  int ok = 1;
   nleft = 4095;
 
   sizeData = 0;
@@ -203,11 +201,11 @@ httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr) {
       data = (char *)malloc((sizeData+ok+1)*sizeof(char));
       if (data != 0) {
 	if (nextData != 0) {
-	  for (i=0; i<sizeData; i++)
+	  for (int i=0; i<sizeData; i++)
 	    data[i]=nextData[i];
 	  free(nextData);
 	}
-	for (i=0, j=sizeData; i<ok; i++, j++)
+	for (int i=0, j=sizeData; i<ok; i++, j++)
 	  data[j]=inBuf[i];
 	sizeData += ok;
 	strcpy(&data[sizeData],"");
@@ -223,11 +221,11 @@ httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr) {
     nextData = strchr(nextData,'\n');
     nextData += 3;
 
-    nwrite = sizeData+1-(nextData-data);
+    nwrite = sizeData + 1 - (nextData-data);
 
     data = (char *)malloc((sizeData+1)*sizeof(char));
-    for (i=0; i<nwrite; i++)
-      data[i]=nextData[i];
+    for (int i=0; i<nwrite; i++)
+      data[i] = nextData[i];
     //    strcpy(&data[nwrite],""); /we already placed a end-of-string marker there above
   }
 
@@ -237,5 +235,4 @@ httpGet(const char *URL, const char *page, unsigned int port, char **dataPtr) {
   
   return 0;
 }
-
 

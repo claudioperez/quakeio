@@ -26,15 +26,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <StringContainer.h>
+#include <string>
+#include <vector>
 
-
-#ifdef _WIN32
-extern int __cdecl
-#else
-extern int
-#endif
-httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr);
+#include "http.h" // httpGet
 
 
 #ifdef _WIN32
@@ -94,7 +89,6 @@ int __cdecl
 #else
 int
 #endif
-
 peerSearchNGA(const char *Eq,
 	      const char *SoilType,
 	      const char *Fault,
@@ -110,9 +104,9 @@ peerSearchNGA(const char *Eq,
 	      const char *LatNE,
 	      const char *LngSW,
 	      const char *LngNE,
-	      StringContainer &ngaRecordNames)
+	      std::vector<std::string> &ngaRecordNames)
 {
-  char *resHTML =0;
+  char *resHTML = 0;
   char *ngaHTML = 0;
 
   int trialID;
@@ -120,21 +114,21 @@ peerSearchNGA(const char *Eq,
   char peerPage[256];
   char noData[1] =  "";
 
-  const char *eq = noData;
-  const char *soilType = noData;
-  const char *fault =noData;
-  const char *magLo =noData;
-  const char *magHi =noData;
-  const char *distLo =noData;
-  const char *distHi =noData;
-  const char *vsLo =noData;
-  const char *vsHi =noData;
-  const char *pgaLo =noData;
-  const char *pgaHi =noData;
-  const char *latSW =noData;
-  const char *latNE =noData;
-  const char *lngSW =noData;
-  const char *lngNE =noData;
+  const char *eq =  noData;
+  const char *soilType =  noData;
+  const char *fault = noData;
+  const char *magLo = noData;
+  const char *magHi = noData;
+  const char *distLo = noData;
+  const char *distHi = noData;
+  const char *vsLo = noData;
+  const char *vsHi = noData;
+  const char *pgaLo = noData;
+  const char *pgaHi = noData;
+  const char *latSW = noData;
+  const char *latNE = noData;
+  const char *lngSW = noData;
+  const char *lngNE = noData;
 
   if (Eq != 0)
     eq = Eq;
@@ -190,9 +184,6 @@ peerSearchNGA(const char *Eq,
       return 0;
     }
 
-
-
-
     loc = resHTML;
     
     //
@@ -245,7 +236,6 @@ peerSearchNGA(const char *Eq,
 	    //
 	    // get the first 2 records
 	    //
-	    
 	    if (recordLoc != 0) {
 	      recordLoc+=14;
 	      char *recordEndLoc = strstr(recordLoc,".AT2");
@@ -253,7 +243,7 @@ peerSearchNGA(const char *Eq,
 	      char *recordName = new char[recordLength+1];
 	      strncpy(recordName, recordLoc, recordLength);
 	      strcpy(&recordName[recordLength],"");
-	      ngaRecordNames.addString(recordName);
+	      ngaRecordNames.push_back(recordName);
 	      delete [] recordName;
 	    } 
 	    
@@ -265,7 +255,7 @@ peerSearchNGA(const char *Eq,
 	      char *recordName = new char[recordLength+1];
 	      strncpy(recordName, recordLoc, recordLength);
 	      strcpy(&recordName[recordLength],"");
-	      ngaRecordNames.addString(recordName);
+	      ngaRecordNames.push_back(recordName);
 	      delete [] recordName;
 	    } 
 	  }
