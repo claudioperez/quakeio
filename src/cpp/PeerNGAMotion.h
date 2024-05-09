@@ -17,14 +17,13 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
-// $Revision: 1.2 $
-// $Date: 2010-02-04 00:36:46 $
-// $Source: /usr/local/cvs/OpenSees/SRC/domain/pattern/PeerNGAMotion.h,v $
-                                                                        
-                                                                        
+//
 #ifndef PeerNGAMotion_h
 #define PeerNGAMotion_h
+#include <iostream>
+#ifndef OPS_Stream
+#  define OPS_Stream std::ostream
+#endif
 
 // Written: fmk 
 // Created: 10/06
@@ -39,11 +38,11 @@
 //
 // What: "@(#) PeerNGAMotion.h, revA"
 
-#include <TimeSeries.h>
+// #include <TimeSeries.h>
 
 class Vector;
 
-class PeerNGAMotion : public TimeSeries
+class PeerNGAMotion // : public TimeSeries
 {
   public:
     // constructors  
@@ -74,11 +73,6 @@ class PeerNGAMotion : public TimeSeries
   double getDt();
   int getNPts();
   
-  // methods for output
-  int sendSelf(int commitTag, Channel &theChannel);
-  int recvSelf(int commitTag, Channel &theChannel, 
-	       FEM_ObjectBroker &theBroker);
-  
   void Print(OPS_Stream &s, int flag =0);    
   
  protected:
@@ -96,8 +90,7 @@ class PeerNGAMotion : public TimeSeries
   int lastSendCommitTag;
   int otherDbTag;       // a database tag needed for the vector object   
   
-  Channel *lastChannel;
+  void *lastChannel;
 };
 
 #endif
-

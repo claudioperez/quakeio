@@ -129,13 +129,13 @@ class QuakeMotion(dict):
     def _update_components(f):
         def wrapped(*args, **kwds):
             res = f(*args, **kwds)
-            [getattr(cmp,s)._refresh() 
+            [getattr(cmp,s)._refresh()
                     for cmp in res.components.values()
                         for s in ["accel","veloc","displ"] if hasattr(cmp,s)]
             return res
         return wrapped
 
-    def __init__(self, components: dict = None, meta:dict=None):
+    def __init__(self, components: dict = None, meta:dict=None, name=None):
         dict.__init__(self)
         self.directions = ["long", "tran", "up"]
         self.components = components if components is not None else {}
@@ -167,7 +167,7 @@ class QuakeMotion(dict):
     def __repr__(self):
         #return f"QuakeMotion({dict.__repr__(self)})"
         return f"QuakeMotion({dict.__repr__(self)})"
-    
+
     def __sub__(self, other):
         ret = copy(self)
         ret.components = {}
@@ -175,7 +175,7 @@ class QuakeMotion(dict):
             if dirn in other.components and dirn in self.components:
                 ret.components[dirn] = self.components[dirn] - other.components[dirn] 
         return ret
-    
+
     def __add__(self, other):
         ret = copy(self)
         ret.components = {}
@@ -184,10 +184,10 @@ class QuakeMotion(dict):
                 ret.components[dirn] = self.components[dirn] + other.components[dirn] 
 
         return ret
-    
+
     def __rsub__(self, other):
         return self.__sub__(other)
-    
+
     def __radd__(self, other):
         return self.__add__(other)
 
@@ -240,7 +240,7 @@ class QuakeMotion(dict):
             try:
                 series[typ] = np.sqrt(sum(
                     np.power(getattr(self.components[dirn],typ), 2)
-                    for dirn in self.directions 
+                    for dirn in self.directions
                         if dirn in self.components and self.components[dirn]
                 ))
             except AttributeError as e:
@@ -326,7 +326,10 @@ class QuakeComponent(dict):
             yield getattr(self,s)
 
     def __repr__(self):
-        return f"QuakeComponent({self['file_name']}) at {hex(id(self))}"
+        if 'file_name' in self:
+            return f"QuakeComponent({self['file_name']}) at {hex(id(self))}"
+        else:
+            return f"QuakeComponent({self['component']}, " + ", ".join(repr(getattr(self, s, False)) or "" for s in ("accel", "veloc", "displ")) + ")"
 
     def find_components(self):
         loc = self["location_name"]

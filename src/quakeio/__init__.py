@@ -2,6 +2,8 @@
 __version__ = "0.1.18"
 
 from pathlib import Path
+from functools import reduce
+import importlib
 
 from . import csmip, nga, eqsig, basic_formats, opensees
 
@@ -28,10 +30,28 @@ DEFAULT_TYPES = {
 }
 
 
+def _find_function(module, name):
+    try:
+        func = reduce(getattr, name.split(".")[1:], module)
+    except AttributeError:
+        # only import if required
+        importlib.import_module(module.__name__ + "." + name.rsplit(".",1)[0])
+        func = reduce(getattr, name.split("."), module)
+    except Exception as e:
+        print(e)
+    return func
+
+def aread(archive, sequence=("event","")):
+    pass
+
 def read(read_file, input_format=None, **kwds):
     """
     Generic ground motion reader
     """
+    if "parser" in kwds:
+        import quakeio
+        return _find_function(quakeio, kwds["parser"])(read_file, **kwds)
+
     input_format = input_format or kwds.pop("format",None)
     if input_format is not None:
         typ = input_format
@@ -40,7 +60,12 @@ def read(read_file, input_format=None, **kwds):
             typ = DEFAULT_TYPES[Path(read_file).suffix.lower()]
         except KeyError:
             raise ValueError("Unable to deduce input format.\n")
-    return FILE_TYPES[typ]["read"](read_file, **kwds)
+
+    if typ in FILE_TYPES:
+        return FILE_TYPES[typ]["read"](read_file, **kwds)
+
+    raise Exception()
+
 
 
 def write(write_file, ground_motion, write_format: str = None, *args, **kwds):
