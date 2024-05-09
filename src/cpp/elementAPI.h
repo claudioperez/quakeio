@@ -250,16 +250,6 @@ EigenSOE** OPS_GetEigenSOE(void);
 int* OPS_GetNumEigen(void);
 bool* OPS_builtModel(void);
 
-// EquiSolnAlgo** OPS_GetAlgorithm(void);
-// DOF_Numberer** OPS_GetNumberer(void);
-// LinearSOE** OPS_GetSOE(void);
-// StaticAnalysis** OPS_GetStaticAnalysis(void);
-// DirectIntegrationAnalysis** OPS_GetTransientAnalysis(void);
-// VariableTimeStepDirectIntegrationAnalysis** OPS_GetVariableTimeStepTransientAnalysis(void);
-// StaticIntegrator** OPS_GetStaticIntegrator(void);
-// TransientIntegrator** OPS_GetTransientIntegrator(void);
-// ConvergenceTest** OPS_GetTest(void);
-
 
 
 #endif // __cplusplus
