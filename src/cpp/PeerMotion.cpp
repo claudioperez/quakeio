@@ -14,7 +14,6 @@ using std::ios;
 #include "http.h"
 
 
-
 #include <elementAPI.h>
 #define OPS_Export 
 
@@ -32,12 +31,12 @@ OPS_PeerMotion(void)
   }
 
   int tag = 0;     // default tag = 0
-  double factor = 0.0; 
-  int numData = 0;
+  double factor  = 0.0; 
+  int numData    = 0;
 
   char *eqMotion = 0;
-  char *station = 0;
-  char *type = 0;
+  char *station  = 0;
+  char *type     = 0;
 
   // get tag if provided
   if (numRemainingArgs == 5 || numRemainingArgs == 7 || numRemainingArgs == 9) {
@@ -71,11 +70,6 @@ OPS_PeerMotion(void)
   }
   
   theSeries = new PeerMotion(tag, eqMotion, station, type, factor);
-
-  if (theSeries == 0) {
-    std::cerr << "WARNING ran out of memory creating PeerMotion with tag: " << tag << "\n";
-    return 0;
-  }
 
   delete [] eqMotion;
   delete [] station;
@@ -275,6 +269,5 @@ PeerMotion::Print(OPS_Stream &s, int flag)
     s << " dT: " << dT << "\n";
     if (flag == 1 && thePath != 0) {
       s << " specified path: " << *thePath;
-
     }
 }

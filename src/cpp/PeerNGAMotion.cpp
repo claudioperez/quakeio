@@ -18,6 +18,7 @@
 #include <Vector.h>
 #include <math.h>
 
+#include <string.h>
 #include <stdio.h>
 #include <time.h>
 #include <iostream>
@@ -37,60 +38,11 @@ int
 httpGet(char const *URL, char const *page, unsigned int port, char **dataPtr);
 
 
-#include <elementAPI.h>
-#define OPS_Export 
-
-OPS_Export void *
-OPS_PeerNGAMotion(void)
-{
-  // Pointer to a uniaxial material that will be returned
-  TimeSeries *theSeries = 0;
-  
-  int numRemainingArgs = OPS_GetNumRemainingInputArgs();
-  
-  if (numRemainingArgs < 2) {
-    std::cerr << "WARNING: invalid num args PeerNGAMotion <tag?> $eqMotion $factor\n";
-    return 0;
-  }
-
-  int tag = 0;     // default tag = 0
-  double factor = 0.0; 
-  int numData = 0;
-  char *type = "-ACCEL";
-
-  // get tag if provided
-  if (numRemainingArgs == 3 || numRemainingArgs == 5 || numRemainingArgs == 7) {
-    numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) != 0) {
-      std::cerr << "WARNING invalid series tag in Constant tag?" << "\n";
-      return 0;
-    }
-    numRemainingArgs -= 1;
-  }
-
-  const char *eqMotion = OPS_GetString();
-
-  numData = 1;
-  if (OPS_GetDouble(&numData, &factor) != 0) {
-    std::cerr << "WARNING invalid shift in peerNGAMotion with tag?" << tag << "\n";
-    return 0;
-  }
-  
-  theSeries = new PeerNGAMotion(tag, eqMotion, type, factor);
-
-  if (theSeries == 0) {
-    std::cerr << "WARNING ran out of memory creating PeerNGAMotion with tag: " << tag << "\n";
-    return 0;
-  }
-
-  return theSeries;
-}
 
 
 
 PeerNGAMotion::PeerNGAMotion()	
-  :TimeSeries(TSERIES_TAG_PeerNGAMotion),
-   thePath(0), dT(0.0), 
+  : thePath(0), dT(0.0), 
    cFactor(0.0), dbTag1(0), dbTag2(0), lastSendCommitTag(-1)
 {
   // does nothing
@@ -102,8 +54,7 @@ PeerNGAMotion::PeerNGAMotion(int tag,
 			     const char *station,
 			     const char *type,
 			     double theFactor)
-  :TimeSeries(tag, TSERIES_TAG_PeerNGAMotion),
-   thePath(0), dT(0.0), 
+  : thePath(0), dT(0.0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
   char peerPage[124];
@@ -184,7 +135,7 @@ PeerNGAMotion::PeerNGAMotion(int tag,
 			     const char *earthquakeStation,
 			     const char *type,
 			     double theFactor)
-  :TimeSeries(tag, TSERIES_TAG_PeerNGAMotion),
+  :
    thePath(0), dT(0.0), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
@@ -250,7 +201,7 @@ PeerNGAMotion::PeerNGAMotion(int tag,
 			     Vector *theDataPoints,
 			     double theTimeStep, 
 			     double theFactor)
-  :TimeSeries(tag, TSERIES_TAG_PeerNGAMotion),
+  :
    thePath(0), dT(theTimeStep), 
    cFactor(theFactor), dbTag1(0), dbTag2(0), lastSendCommitTag(-1), lastChannel(0)
 {
@@ -259,16 +210,9 @@ PeerNGAMotion::PeerNGAMotion(int tag,
 }
 
 
-TimeSeries *
-PeerNGAMotion::getCopy(void) 
-{
-  return new PeerNGAMotion(this->getTag(), thePath, dT, cFactor);
-}
-
-
 PeerNGAMotion::~PeerNGAMotion()
 {
-  if (thePath != 0)
+  if (thePath != nullptr)
     delete thePath;
 }
 
@@ -349,14 +293,3 @@ PeerNGAMotion::getNPts()
 }
 
 
-
-void
-PeerNGAMotion::Print(OPS_Stream &s, int flag)
-{
-    s << "Path Time Series: constant factor: " << cFactor;
-    s << " dT: " << dT << "\n";
-    if (flag == 1 && thePath != 0) {
-      s << " specified path: " << *thePath;
-
-    }
-}
