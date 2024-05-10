@@ -41,13 +41,13 @@ def _read_smc(read_file, archive = None, summarize=False):
         # Value representing "undefined" or "null" in the integer header.
         int_null = int_header[0]
 
-        real_header = [next(f) for _ in range(10)]
+        # real_header = [next(f) for _ in range(10)]
 
-#       real_header = np.genfromtxt(
-#           f,
-#           max_rows= 10,
-#           delimiter=10,
-#       ).flatten()
+        real_header = np.genfromtxt(
+          f,
+          max_rows= 10,
+          delimiter=10,
+        ).flatten()
 
         num_comment_lines = int_header[15]
         len_accel = int_header[16]
@@ -78,11 +78,14 @@ def read_series(
         txt_header, int_header, real_header, data = _read_smc(read_file, archive, summarize=summarize)
 
         motion_data = {
-            "component": int_header[12],
-            "location_name": str(txt_header[5][10:]).split("component")[0]
+            "component":       int(int_header[12]),
+            "location_name":   str(txt_header[5][10:]).split("component")[0],
+            "station_channel": str(int_header[8]),
+            "time_step":       float(real_header[1])
         }
 
-        return QuakeSeries(data, meta={"type": str(txt_header[0])}), motion_data
+        return QuakeSeries(data, meta={"type": str(txt_header[0]), 
+                                       "time_step": float(real_header[1])}), motion_data
 
 
 
@@ -123,6 +126,7 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds)->QuakeCollection
             pass
         else:
             component[stype] = series
+            component["station_channel"] = motion_data["station_channel"]
 
 
     date = None
@@ -132,23 +136,23 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds)->QuakeCollection
                        component.get("accel", None),
                        component.get("veloc", None),
                        component.get("displ", None),
-                    meta=dict(component=dir))
+                    meta=dict(component=dir, station_channel=component["station_channel"]))
                 for dir,component in motion.items()
             }, dict(location_name=k))
             for k, motion in file_data.items()
     }
 
     # Collect some other information from the first file (component)
-    first_motion    = list(motions.values())[0]
-    first_component = list(first_motion.components.values())[0]
+    # first_motion    = list(motions.values())[0]
+    # first_component = list(first_motion.components.values())[0]
 
 
     metadata = {
         "file_name": str(read_file),
-        "station_name":      first_component.get("station_name", "NA"),
-        "station_coord":     first_component.get("station.coord", "NA"),
-        "record_identifier": first_component.get("record_identifier", "NA"),
-        "station_number":    first_component.get("station.no", "NA")
+        # "station_name":      first_component.get("station_name", "NA"),
+        # "station_coord":     first_component.get("station.coord", "NA"),
+        # "record_identifier": first_component.get("record_identifier", "NA"),
+        # "station_number":    first_component.get("station.no", "NA")
     }
     return QuakeCollection(motions, event_date=date, meta=metadata)
 

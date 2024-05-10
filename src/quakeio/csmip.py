@@ -184,6 +184,8 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
     zippath    = Path(read_file)
     archive    = zipfile.ZipFile(zippath)
     motions    = defaultdict(QuakeMotion)
+
+    v1 = False
     
     # Loop over V1 and V2 files in the zipped archive
     for file in archive.namelist():
