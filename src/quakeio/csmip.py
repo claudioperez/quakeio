@@ -101,8 +101,8 @@ HEADER_FIELDS = {
         # )
     ),
     # line 8
-    # ("record.channel", "record.component", "_", "record.station_channel", "record.location_name"): (
-    ("record.channel", "record.component", "_", "_", "record.location_name"): (
+    ("record.channel", "record.component", "_", "record.station_channel", "record.location_name"): (
+    # ("record.channel", "record.component", "_", "_", "record.location_name"): (
         (str, str, maybe_t("(DegR*)",str), maybe_t("Sta Chn: ([0-9]*)", words), words),
         re.compile(# (  1   )   (---------)  (---)   (--)             (------)
             rf"Chan *([0-9]*): *([A-z0-9]*) *(DegR*)? *(.*) *Location: *([ -~]*)\s",
@@ -184,6 +184,8 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
     zippath    = Path(read_file)
     archive    = zipfile.ZipFile(zippath)
     motions    = defaultdict(QuakeMotion)
+
+    v1 = False
 
     # Loop over V1 and V2 files in the zipped archive
     for file in archive.namelist():
@@ -404,7 +406,9 @@ def read_record_v2(
             series_data[typ].update({k: val})
 
     record_data["file_name"] = filename.name
-    record_data["station_channel"] = str(int(re_digits.search(filename.name.split(".")[0]).group(0)))
+
+    if "station_channel" not in record_data or not record_data["station_channel"]:
+    	record_data["station_channel"] = str(int(re_digits.search(filename.name.split(".")[0]).group(0)))
 
     try:
         record_data.update({

@@ -37,8 +37,8 @@ def _find_function(module, name):
         # only import if required
         importlib.import_module(module.__name__ + "." + name.rsplit(".",1)[0])
         func = reduce(getattr, name.split("."), module)
-    except Exception as e:
-        print(e)
+    # except Exception as e:
+    #     print(e)
     return func
 
 def aread(archive, sequence=("event","")):
@@ -48,7 +48,7 @@ def read(read_file, input_format=None, **kwds):
     """
     Generic ground motion reader
     """
-    if "parser" in kwds:
+    if "parser" in kwds and kwds["parser"] is not None:
         import quakeio
         return _find_function(quakeio, kwds["parser"])(read_file, **kwds)
 
