@@ -18,10 +18,11 @@ from .core import (
 )
 
 def _read_smc(read_file, archive = None, summarize=False):
-
     NUM_COLUMNS = 8
+
     with open_quake(read_file, "r", archive) as f:
-        # First 11 lines
+
+        # Text header; first 11 lines
         txt_header = [next(f) for _ in range(11)]
 
         # 48 integer values spanning 6 lines
