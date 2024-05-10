@@ -184,7 +184,7 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
     zippath    = Path(read_file)
     archive    = zipfile.ZipFile(zippath)
     motions    = defaultdict(QuakeMotion)
-    
+
     # Loop over V1 and V2 files in the zipped archive
     for file in archive.namelist():
         # Disregard any files that are not V1 or V2
@@ -224,7 +224,7 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds):
     # Otherwise, just take the peaks from the parsed metadata.
     else:
         peak_accel = max(
-            (c.accel.get("peak_value", 0.0) for m in motions.values() for c in m.components.values()), 
+            (c.accel.get("peak_value", 0.0) for m in motions.values() for c in m.components.values()),
             key=abs
         )
 
@@ -250,7 +250,7 @@ V1_EXCLUDE = ("filter*", "*peak*", "*init*", "*disp*", "*velo*")
 
 
 def read_record_v2(
-    read_file, 
+    read_file,
     archive: zipfile.ZipFile = None,
     verbosity: int  = 0,
     summarize: bool =False,
@@ -326,7 +326,7 @@ def read_record_v2(
         )
 
         assert len(real_header) == (50 if v1 else 100)
-        
+
         # Clean and process numeric header data, setup for parse stage 3.
         num_header = _process_numeric_headers_v2(int_header, real_header, header_data)
         # extract information about shape of data
@@ -375,6 +375,8 @@ def read_record_v2(
                 veloc, displ = [], []
         else:
             accel, veloc, displ = [], [], []
+
+
 
     # Treat metadata
     try:
