@@ -66,7 +66,7 @@ class QuakeCollection(dict):
             return self.at(*args, **kwds)
         if t[0] == "r":
             import re
-            test = lambda x, y: re.match(x, y)
+            test = lambda x, y: re.match(str(x), str(y))
         elif t == ">":
             test = lambda x, y: x > y
         elif t == "<":
@@ -257,7 +257,7 @@ class QuakeMotion(dict):
             return self.at(*args, **kwds)
         if t[0] == "r":
             import re
-            test = lambda x, y: re.match(x, y)
+            test = lambda x, y: re.match(x, str(y))
         elif t == ">":
             test = lambda x, y: x > y
         elif t == "<":
