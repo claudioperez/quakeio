@@ -33,6 +33,7 @@ def open_quake(file, mode=None, archive=None):
             fh = sys.stdin
         else:
             fh = sys.stdout
+
     elif not archive and isinstance(file, (PathLike, str)):
         fh = open(file, mode)
     elif archive:
