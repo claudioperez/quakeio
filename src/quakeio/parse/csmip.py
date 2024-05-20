@@ -13,14 +13,14 @@ from collections import defaultdict
 
 import numpy as np
 
-from .core import (
+from quakeio.core import (
     QuakeCollection,
     QuakeMotion,
     QuakeComponent,
     QuakeSeries,
 )
 
-from .utils.parseutils import (
+from quakeio.utils.parseutils import (
     parse_sequential_fields,
     open_quake,
     RE_DECIMAL,  # Regular expression for extracting decimal values

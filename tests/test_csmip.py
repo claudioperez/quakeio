@@ -1,3 +1,4 @@
+#!/bin/env python
 from pathlib import Path
 
 import quakeio
@@ -55,6 +56,49 @@ def test_veloc_data():
     assert csmip_record.veloc.data[-1] == 0.0001009
 
 
-
 # csmip_record = quakeio.QuakeComponent(csmip_dir/"chan001.v2")
+if __name__ == "__main__":
+    import sys, yaml
+    from pathlib import Path
+    from collections import defaultdict
+
+    file_list = sys.argv[1:]
+
+    fields = {k: defaultdict(lambda: 0) for k in ("collection", "motion", "component", "series")}
+
+    
+    counts = defaultdict(lambda: 0)
+    for file in file_list:
+        try:
+            collection = quakeio.read(file)
+        except:
+            print(file)
+            continue
+
+        counts["collection"] += 1
+        for k,v in collection.items():
+            fields["collection"][k] += 1
+            for motion in collection.motions.values():
+                counts["motion"] += 1
+                for k,v in motion.items():
+                    fields["motion"][k] += 1
+                    for component in motion.components.values():
+                        counts["component"] += 1
+                        for k,v in component.items():
+                            fields["component"][k] += 1
+                            for series in "accel", "veloc", "displ":
+                                counts["series"] += 1
+                                for k,v in getattr(component, series).items():
+                                    fields["series"][k] += 1
+
+    results = {
+        f"{typ} ({counts[typ]})": {field: fields[typ][field] / counts[typ] for field in fields[typ]}
+        for typ in counts
+    }
+    yaml.dump(results, sys.stdout)
+        
+
+
+
+
 

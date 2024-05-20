@@ -1,3 +1,5 @@
+
+from pathlib import Path
 import numpy as np
 from numpy import pi
 from quakeio.core import QuakeComponent, QuakeSeries
@@ -8,7 +10,7 @@ except:
     import numpy as jnp
 
 
-from pathlib import Path
+
 import matplotlib.pyplot as plt
 try:
     style_file = Path(__file__).parents[0]/"brace2.mplstyle"
