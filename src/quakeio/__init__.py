@@ -1,11 +1,11 @@
 # Claudio Perez
-__version__ = "0.1.18"
+__version__ = "0.1.19"
 
+import importlib
 from pathlib import Path
 from functools import reduce
-import importlib
 
-from . import csmip, nga, eqsig, basic_formats, opensees
+from .parse import csmip, nga, eqsig, basic_formats, opensees
 
 FILE_TYPES = {}
 
@@ -37,12 +37,8 @@ def _find_function(module, name):
         # only import if required
         importlib.import_module(module.__name__ + "." + name.rsplit(".",1)[0])
         func = reduce(getattr, name.split("."), module)
-    # except Exception as e:
-    #     print(e)
     return func
 
-def aread(archive, sequence=("event","")):
-    pass
 
 def read(read_file, input_format=None, **kwds):
     """
@@ -50,7 +46,7 @@ def read(read_file, input_format=None, **kwds):
     """
     if "parser" in kwds and kwds["parser"] is not None:
         import quakeio
-        return _find_function(quakeio, kwds["parser"])(read_file, **kwds)
+        return _find_function(quakeio, "parse."+kwds["parser"])(read_file, **kwds)
 
     input_format = input_format or kwds.pop("format",None)
     if input_format is not None:
