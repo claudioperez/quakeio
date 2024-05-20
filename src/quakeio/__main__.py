@@ -1,14 +1,14 @@
 # Claudio Perez
 # Command line interface for QuakeIO tool
 import argparse
-
+import sys
 import quakeio
 
 
 def build_parser():
     # fmt: off
     parser = argparse.ArgumentParser(
-        prog="quakeio", 
+        prog="quakeio",
         description="""Parsers and utilities for processing and converting accelerograms.
 
         """,
@@ -71,6 +71,13 @@ def build_parser():
             help="Specify an output file."
     )
     parser.add_argument(
+            "-p",
+            "--parser",
+            dest="parser",
+            default=None,
+            help="Specify a parser."
+    )
+    parser.add_argument(
         "-r",
         "--rotate",
         dest="angle",
@@ -114,12 +121,21 @@ def cli(*args, write_file="-", human=False, validate=False, version=False, comma
                 typ = "l"
             kvs.update({key: val})
             motion = motion.match(typ, **kvs)
+            if motion is not None:
+                break
+        else:
+            print(f"No match for pattern {kwds['match_patterns']}", file=sys.stderr)
+            sys.exit(-1)
+
     if validate:
         run_validation(motion)
+
     if human:
         motion = quakeio.core.write_pretty(motion)
+
     if "angle" in kwds and kwds["angle"]:
         quakeio.core.rotate(motion, float(kwds["angle"]))
+
 
     quakeio.write(write_file, motion, **kwds)
     print("\n")
