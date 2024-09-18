@@ -3,6 +3,7 @@ https://escweb.wr.usgs.gov/nsmp-data/smcfmt.html
 """
 import sys
 import zipfile
+import warnings
 from pathlib import Path
 from collections import defaultdict
 
@@ -57,7 +58,11 @@ def _read_smc(read_file, archive = None, summarize=False):
 
         num_comment_lines = int_header[15]
         len_accel = int_header[16]
-        comments = [next(f) for _ in range(num_comment_lines)]
+
+        # Parse comments
+        comments = [str(next(f)) for _ in range(num_comment_lines)]
+
+        # Parse data
 
         if not summarize:
             options = dict(
@@ -70,7 +75,7 @@ def _read_smc(read_file, archive = None, summarize=False):
         else:
             data = []
 
-    return txt_header, int_header, real_header, data
+    return txt_header, int_header, real_header, comments, data
 
 def read_series(
     read_file,
@@ -81,13 +86,20 @@ def read_series(
     **kwds
 ) -> QuakeSeries:
 
-        txt_header, int_header, real_header, data = _read_smc(read_file, archive, summarize=summarize)
+        txt_header, int_header, real_header, comments, data = _read_smc(read_file, archive, summarize=summarize)
 
         time_step = 1/float(real_header[1])
 
+        station = txt_header[5][10:].decode().split("component")[0].strip()
+        location = station 
+        for line in comments:
+            if "<loclbl" in line:
+                location = line[12:line.find("<end>")]
+                break
+
         motion_data = {
             "component":       int(int_header[12]),
-            "location_name":   txt_header[5][10:].decode().split("component")[0].strip(),
+            "location_name":   location,
             "key":             _make_key(str(txt_header[5][10:]).split("component")[0].strip()),
             "station_channel": str(int_header[8]),
             "time_step":       time_step
@@ -104,7 +116,6 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds)->QuakeCollection
     """
     """
 
-    components = defaultdict(dict)
     zippath    = Path(read_file)
     archive    = zipfile.ZipFile(zippath)
     file_data = defaultdict(lambda : defaultdict(dict))
@@ -123,6 +134,9 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds)->QuakeCollection
 
         series, motion_data = read_series(file, archive, verbosity=verbosity,
                                           summarize=summarize, **kwds)
+        
+        if verbosity > 2:
+            print(f"\t{motion_data['location_name']}")
 
         stype = file.split("_")[-1]
         stype = {
@@ -132,13 +146,27 @@ def read_event(read_file, verbosity=0, summarize=False, **kwds)->QuakeCollection
         }[stype]
 
         component = file_data[motion_data["location_name"]][motion_data["component"]]
+
         if stype in component and "corrected" in component[stype]["type"].lower():
             # If we already have the corrected values, pass
-            pass
+            if verbosity > 2:
+                print(f"\t\t\tskipping component {component}", file=sys.stderr)
         else:
+            if stype in component:
+                if verbosity > 1:
+                    warnings.warn(f"possibly overwritten channel at ")
+                
+                # Find a new unique location name for the motion
+                while motion_data["location_name"] in file_data:
+                    motion_data["location_name"] += "_anothaone"
+
+                component = file_data[motion_data["location_name"]][motion_data["component"]]
+
             component[stype] = series
             component["station_channel"] = motion_data["station_channel"]
             component["file_name"] = file
+            if verbosity > 2:
+                print(f"\t\t\tadded component {component}", file=sys.stderr)
 
 
     date = None
