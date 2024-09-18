@@ -315,8 +315,12 @@ class QuakeComponent(dict):
         self.veloc = veloc
         self._parent = motion
 
-        for series in [accel, veloc, displ]:
-            series._parent = self
+        if not any(i is not None for i in (accel, veloc, displ)):
+            raise ValueError("One of accel, veloc or displ must be non-None")
+        
+        for series in (accel, veloc, displ):
+            if series is not None:
+                series._parent = self
 
         dict.__init__(self, **meta)
 
